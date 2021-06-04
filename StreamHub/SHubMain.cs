@@ -86,7 +86,7 @@ namespace StreamHub
 
         private void Client_OnJoinedChannel(object sender, OnJoinedChannelArgs e)
         {
-            client.SendMessage(e.Channel, $"Le bot {config.BotName} est maintenant connecté et à l'écoute !");
+            client.SendMessage(e.Channel, $"/me prêt à l'action et en attente d'instruction...");
             channel = e.Channel;
         }
 

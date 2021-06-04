@@ -49,9 +49,12 @@ namespace StreamHub
             if (SHubConfiguration.isSetup()) { DialogResult = DialogResult.OK; }
         }
 
-        private void TwitchOAuth_Click(object sender, EventArgs e)
+        private void GetToken_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            
+            System.Diagnostics.Process.Start("https://twitchtokengenerator.com/");
+            MessageBox.Show("Choose 'Custom Scope Token' and keep the information generated in safe place.\r\n" +
+                "Check all Helix scope and uncheck all V5 scope.\r\n" +
+                "Once Gathered, put this information in the software.");
         }
     }
 }

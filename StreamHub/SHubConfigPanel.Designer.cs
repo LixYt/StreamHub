@@ -61,7 +61,7 @@ namespace StreamHub
             this.listView1 = new System.Windows.Forms.ListView();
             this.c_BotName = new System.Windows.Forms.TextBox();
             this.label9 = new System.Windows.Forms.Label();
-            this.TwitchOAuth = new System.Windows.Forms.Button();
+            this.GetToken = new System.Windows.Forms.LinkLabel();
             this.groupBox3.SuspendLayout();
             this.groupBox4.SuspendLayout();
             this.SuspendLayout();
@@ -380,22 +380,23 @@ namespace StreamHub
             this.label9.TabIndex = 16;
             this.label9.Text = "Bot Name";
             // 
-            // TwitchOAuth
+            // GetToken
             // 
-            this.TwitchOAuth.Location = new System.Drawing.Point(501, 10);
-            this.TwitchOAuth.Name = "TwitchOAuth";
-            this.TwitchOAuth.Size = new System.Drawing.Size(131, 23);
-            this.TwitchOAuth.TabIndex = 18;
-            this.TwitchOAuth.Text = "Twitch OAuth";
-            this.TwitchOAuth.UseVisualStyleBackColor = true;
-            this.TwitchOAuth.Click += new System.EventHandler(this.TwitchOAuth_Click);
+            this.GetToken.AutoSize = true;
+            this.GetToken.Location = new System.Drawing.Point(521, 10);
+            this.GetToken.Name = "GetToken";
+            this.GetToken.Size = new System.Drawing.Size(96, 15);
+            this.GetToken.TabIndex = 18;
+            this.GetToken.TabStop = true;
+            this.GetToken.Text = "Get Twitch Token";
+            this.GetToken.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.GetToken_LinkClicked);
             // 
             // SHubConfigPanel
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(644, 616);
-            this.Controls.Add(this.TwitchOAuth);
+            this.Controls.Add(this.GetToken);
             this.Controls.Add(this.c_BotName);
             this.Controls.Add(this.label9);
             this.Controls.Add(this.groupBox4);
@@ -462,6 +463,6 @@ namespace StreamHub
         private System.Windows.Forms.CheckBox c_ViewerPool_SubBonusByTiers;
         private System.Windows.Forms.TextBox c_ViewerPool_RegisterCommand;
         private System.Windows.Forms.Button c_Save;
-        private System.Windows.Forms.Button TwitchOAuth;
+        private System.Windows.Forms.LinkLabel GetToken;
     }
 }
