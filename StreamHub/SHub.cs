@@ -38,8 +38,8 @@ namespace StreamHub
 
             api = new TwitchAPI();
             client = new TwitchClient();
-            api.Settings.ClientId = TwitchToken.clientId;
-            api.Settings.AccessToken = TwitchToken.access_token; // App Secret is not an Accesstoken
+            api.Settings.ClientId = "ClientId";
+            api.Settings.AccessToken = "AccessToken"; // App Secret is not an Accesstoken
 
             _ = Calls();
 
@@ -49,7 +49,7 @@ namespace StreamHub
         {
             try
             {
-                ConnectionCredentials credentials = new ConnectionCredentials("lix_danssonlabo", TwitchToken.access_token);
+                ConnectionCredentials credentials = new ConnectionCredentials("lix_danssonlabo", "AccessToken");
                 var clientOptions = new ClientOptions
                 {
                     MessagesAllowedInPeriod = 750,
@@ -67,7 +67,7 @@ namespace StreamHub
 
                 client.Connect();
 
-                Chan = await api.V5.Channels.GetChannelAsync(TwitchToken.access_token);
+                Chan = await api.V5.Channels.GetChannelAsync("AccessToken");
                 liveState.Checked = await api.V5.Streams.BroadcasterOnlineAsync(Chan.Id);
 
                 clientPubSub = new TwitchPubSub();

@@ -48,5 +48,10 @@ namespace StreamHub
         {
             if (SHubConfiguration.isSetup()) { DialogResult = DialogResult.OK; }
         }
+
+        private void TwitchOAuth_Click(object sender, EventArgs e)
+        {
+            
+        }
     }
 }

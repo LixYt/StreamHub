@@ -47,12 +47,6 @@ namespace StreamHub
                 }
             }
 
-            _ = Calls();
-
-        }
-
-        private async Task Calls()
-        {
             try
             {
                 var clientOptions = new ClientOptions
@@ -183,7 +177,10 @@ namespace StreamHub
             {
                 MessageBox.Show("Please configure this tool before using");
                 ConfigPannel.ShowDialog();
+                client.Disconnect();
+                client.Connect();
             }
+            
         }
 
         private void c_viewerpool_startstop_Click(object sender, EventArgs e)
