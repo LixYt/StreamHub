@@ -15,6 +15,7 @@ using TwitchLib.Communication.Clients;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
+using System.IO;
 
 namespace StreamHub
 {
@@ -97,6 +98,7 @@ namespace StreamHub
 
         private void Client_OnMessageReceived(object sender, OnMessageReceivedArgs e)
         {
+            /* ViewerPool */
             if (ViewerPool_Status && e.ChatMessage.Message == config.CommandSymbol + config.ViewerPool_RegisterCommand)
             {
                 if (ViewerPoolList.Contains(e.ChatMessage.Username))
@@ -109,6 +111,8 @@ namespace StreamHub
                     ViewerPoolList.Add(e.ChatMessage.Username);
                     client.SendWhisper(e.ChatMessage.Username, $"You are added in the pool with {(e.ChatMessage.IsSubscriber && config.ViewerPool_SubBonus ? 2 : 1)} chances.");
                     if (e.ChatMessage.IsSubscriber && config.ViewerPool_SubBonus) { ViewerPoolList.Add(e.ChatMessage.Username); }
+
+                    UpdateObsFiles();
                 }
             }
 
@@ -136,12 +140,24 @@ namespace StreamHub
 
                     client.SendMessage(e.ChatMessage.Channel, $"{e.ChatMessage.Username} a lancé {e.ChatMessage.Message} et obtenu : ({dices.TrimEnd(',')}) pour un total de {result} !");
                 }
-
             }
 
+            /* ^^^ ViewerPool ^^^ */
+        }
 
-            
-            
+        public void UpdateObsFiles()
+        {
+            /* ViewerPool current list */
+            using (StreamWriter sw = File.CreateText("OBS_ViewerPool.txt"))
+            {
+                string ViewerPoolTxt = "";
+                foreach(string s in c_ViewerPool.Items)
+                {
+                    ViewerPoolTxt += $"{s}\r\n";
+                }
+                sw.WriteLine(ViewerPoolTxt);
+            }
+
 
         }
 
@@ -193,6 +209,7 @@ namespace StreamHub
                 c_ViewerPool.Items.Clear();
                 SelectedUser = "";
                 ViewerPoolList.Clear();
+                UpdateObsFiles();
             }
         }
 
