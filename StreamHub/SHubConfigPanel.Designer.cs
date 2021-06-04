@@ -100,7 +100,7 @@ namespace StreamHub
             this.c_ClientID.Location = new System.Drawing.Point(125, 10);
             this.c_ClientID.MaxLength = 1000;
             this.c_ClientID.Name = "c_ClientID";
-            this.c_ClientID.Size = new System.Drawing.Size(425, 23);
+            this.c_ClientID.Size = new System.Drawing.Size(359, 23);
             this.c_ClientID.TabIndex = 3;
             // 
             // c_ChannelName
@@ -108,7 +108,7 @@ namespace StreamHub
             this.c_ChannelName.Location = new System.Drawing.Point(125, 39);
             this.c_ChannelName.MaxLength = 1000;
             this.c_ChannelName.Name = "c_ChannelName";
-            this.c_ChannelName.Size = new System.Drawing.Size(425, 23);
+            this.c_ChannelName.Size = new System.Drawing.Size(359, 23);
             this.c_ChannelName.TabIndex = 5;
             // 
             // label2
@@ -126,7 +126,7 @@ namespace StreamHub
             this.c_AccessToken.MaxLength = 1000;
             this.c_AccessToken.Name = "c_AccessToken";
             this.c_AccessToken.PasswordChar = '*';
-            this.c_AccessToken.Size = new System.Drawing.Size(425, 23);
+            this.c_AccessToken.Size = new System.Drawing.Size(359, 23);
             this.c_AccessToken.TabIndex = 7;
             this.c_AccessToken.UseSystemPasswordChar = true;
             // 
@@ -145,7 +145,7 @@ namespace StreamHub
             this.c_RefreshToken.MaxLength = 1000;
             this.c_RefreshToken.Name = "c_RefreshToken";
             this.c_RefreshToken.PasswordChar = '*';
-            this.c_RefreshToken.Size = new System.Drawing.Size(425, 23);
+            this.c_RefreshToken.Size = new System.Drawing.Size(359, 23);
             this.c_RefreshToken.TabIndex = 9;
             this.c_RefreshToken.UseSystemPasswordChar = true;
             // 
@@ -193,7 +193,7 @@ namespace StreamHub
             this.groupBox3.Controls.Add(this.c_ViewerPool_RegisterCommand);
             this.groupBox3.Controls.Add(this.c_ViewerPool_SubBonus);
             this.groupBox3.Controls.Add(this.label5);
-            this.groupBox3.Location = new System.Drawing.Point(13, 204);
+            this.groupBox3.Location = new System.Drawing.Point(2, 204);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Size = new System.Drawing.Size(384, 142);
             this.groupBox3.TabIndex = 12;
@@ -203,6 +203,7 @@ namespace StreamHub
             // c_ViewerPool_SubBonusByTiers
             // 
             this.c_ViewerPool_SubBonusByTiers.AutoSize = true;
+            this.c_ViewerPool_SubBonusByTiers.Enabled = false;
             this.c_ViewerPool_SubBonusByTiers.Location = new System.Drawing.Point(45, 47);
             this.c_ViewerPool_SubBonusByTiers.Name = "c_ViewerPool_SubBonusByTiers";
             this.c_ViewerPool_SubBonusByTiers.Size = new System.Drawing.Size(227, 19);
@@ -366,7 +367,7 @@ namespace StreamHub
             this.c_BotName.Location = new System.Drawing.Point(245, 126);
             this.c_BotName.MaxLength = 1000;
             this.c_BotName.Name = "c_BotName";
-            this.c_BotName.Size = new System.Drawing.Size(305, 23);
+            this.c_BotName.Size = new System.Drawing.Size(239, 23);
             this.c_BotName.TabIndex = 17;
             // 
             // label9
