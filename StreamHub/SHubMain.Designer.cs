@@ -37,14 +37,13 @@ namespace StreamHub
             this.c_viewerpool_startstop = new System.Windows.Forms.Button();
             this.button4 = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.button10 = new System.Windows.Forms.Button();
-            this.button9 = new System.Windows.Forms.Button();
-            this.button8 = new System.Windows.Forms.Button();
-            this.button6 = new System.Windows.Forms.Button();
-            this.button7 = new System.Windows.Forms.Button();
-            this.treeView1 = new System.Windows.Forms.TreeView();
+            this.c_GTAPool = new System.Windows.Forms.DataGridView();
+            this.c_GTA_Auto = new System.Windows.Forms.Button();
+            this.c_GTA_Reset = new System.Windows.Forms.Button();
+            this.c_GTA_startstop = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.c_GTAPool)).BeginInit();
             this.SuspendLayout();
             // 
             // C_ConfigForm
@@ -122,12 +121,10 @@ namespace StreamHub
             // 
             // groupBox2
             // 
-            this.groupBox2.Controls.Add(this.button10);
-            this.groupBox2.Controls.Add(this.button9);
-            this.groupBox2.Controls.Add(this.button8);
-            this.groupBox2.Controls.Add(this.button6);
-            this.groupBox2.Controls.Add(this.button7);
-            this.groupBox2.Controls.Add(this.treeView1);
+            this.groupBox2.Controls.Add(this.c_GTAPool);
+            this.groupBox2.Controls.Add(this.c_GTA_Auto);
+            this.groupBox2.Controls.Add(this.c_GTA_Reset);
+            this.groupBox2.Controls.Add(this.c_GTA_startstop);
             this.groupBox2.Location = new System.Drawing.Point(246, 12);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(244, 426);
@@ -135,57 +132,45 @@ namespace StreamHub
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "GameViewer Team Assembler";
             // 
-            // button10
+            // c_GTAPool
             // 
-            this.button10.Location = new System.Drawing.Point(135, 51);
-            this.button10.Name = "button10";
-            this.button10.Size = new System.Drawing.Size(96, 23);
-            this.button10.TabIndex = 11;
-            this.button10.Text = "Auto choose";
-            this.button10.UseVisualStyleBackColor = true;
+            this.c_GTAPool.AllowUserToAddRows = false;
+            this.c_GTAPool.AllowUserToOrderColumns = true;
+            this.c_GTAPool.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.c_GTAPool.Location = new System.Drawing.Point(6, 80);
+            this.c_GTAPool.Name = "c_GTAPool";
+            this.c_GTAPool.RowTemplate.Height = 25;
+            this.c_GTAPool.Size = new System.Drawing.Size(225, 334);
+            this.c_GTAPool.TabIndex = 12;
             // 
-            // button9
+            // c_GTA_Auto
             // 
-            this.button9.Location = new System.Drawing.Point(172, 22);
-            this.button9.Name = "button9";
-            this.button9.Size = new System.Drawing.Size(59, 23);
-            this.button9.TabIndex = 10;
-            this.button9.Text = "Reset";
-            this.button9.UseVisualStyleBackColor = true;
+            this.c_GTA_Auto.Location = new System.Drawing.Point(6, 51);
+            this.c_GTA_Auto.Name = "c_GTA_Auto";
+            this.c_GTA_Auto.Size = new System.Drawing.Size(225, 23);
+            this.c_GTA_Auto.TabIndex = 11;
+            this.c_GTA_Auto.Text = "Build a team";
+            this.c_GTA_Auto.UseVisualStyleBackColor = true;
             // 
-            // button8
+            // c_GTA_Reset
             // 
-            this.button8.Location = new System.Drawing.Point(6, 51);
-            this.button8.Name = "button8";
-            this.button8.Size = new System.Drawing.Size(123, 23);
-            this.button8.TabIndex = 9;
-            this.button8.Text = "Choose this player";
-            this.button8.UseVisualStyleBackColor = true;
+            this.c_GTA_Reset.Location = new System.Drawing.Point(172, 22);
+            this.c_GTA_Reset.Name = "c_GTA_Reset";
+            this.c_GTA_Reset.Size = new System.Drawing.Size(59, 23);
+            this.c_GTA_Reset.TabIndex = 10;
+            this.c_GTA_Reset.Text = "Reset";
+            this.c_GTA_Reset.UseVisualStyleBackColor = true;
             // 
-            // button6
+            // c_GTA_startstop
             // 
-            this.button6.Location = new System.Drawing.Point(93, 22);
-            this.button6.Name = "button6";
-            this.button6.Size = new System.Drawing.Size(73, 23);
-            this.button6.TabIndex = 8;
-            this.button6.Text = "Stop pool";
-            this.button6.UseVisualStyleBackColor = true;
-            // 
-            // button7
-            // 
-            this.button7.Location = new System.Drawing.Point(6, 22);
-            this.button7.Name = "button7";
-            this.button7.Size = new System.Drawing.Size(81, 23);
-            this.button7.TabIndex = 7;
-            this.button7.Text = "Start pool";
-            this.button7.UseVisualStyleBackColor = true;
-            // 
-            // treeView1
-            // 
-            this.treeView1.Location = new System.Drawing.Point(6, 80);
-            this.treeView1.Name = "treeView1";
-            this.treeView1.Size = new System.Drawing.Size(225, 334);
-            this.treeView1.TabIndex = 0;
+            this.c_GTA_startstop.ForeColor = System.Drawing.Color.Red;
+            this.c_GTA_startstop.Location = new System.Drawing.Point(6, 22);
+            this.c_GTA_startstop.Name = "c_GTA_startstop";
+            this.c_GTA_startstop.Size = new System.Drawing.Size(160, 23);
+            this.c_GTA_startstop.TabIndex = 7;
+            this.c_GTA_startstop.Text = "Start /Stop Assembler";
+            this.c_GTA_startstop.UseVisualStyleBackColor = true;
+            this.c_GTA_startstop.Click += new System.EventHandler(this.c_GTA_startstop_Click);
             // 
             // SHubMain
             // 
@@ -199,6 +184,7 @@ namespace StreamHub
             this.Text = "SHubMain";
             this.groupBox1.ResumeLayout(false);
             this.groupBox2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.c_GTAPool)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -213,12 +199,11 @@ namespace StreamHub
         private System.Windows.Forms.Button c_ViewerPool_Reset;
         private System.Windows.Forms.Button button4;
         private System.Windows.Forms.GroupBox groupBox2;
-        private System.Windows.Forms.Button button6;
-        private System.Windows.Forms.Button button7;
-        private System.Windows.Forms.TreeView treeView1;
-        private System.Windows.Forms.Button button9;
-        private System.Windows.Forms.Button button8;
-        private System.Windows.Forms.Button button10;
+        private System.Windows.Forms.Button c_GTA_;
+        private System.Windows.Forms.Button c_GTA_Reset;
+        private System.Windows.Forms.Button c_GTA_Auto;
         private System.Windows.Forms.Button c_viewerpool_startstop;
+        private System.Windows.Forms.Button c_GTA_startstop;
+        private System.Windows.Forms.DataGridView c_GTAPool;
     }
 }

@@ -60,6 +60,7 @@ namespace StreamHub
                 catch (Exception Ex)
                 {
                     MessageBox.Show(Ex.Message);
+                    config = new SHubConfig();
                 }
                 stream.Close();
             }

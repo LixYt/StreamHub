@@ -25,9 +25,15 @@ namespace StreamHub
         private SHubConfig config;
 
         private bool ViewerPool_Status = false;
+        private bool GTA_status = false;
         string channel = "";
 
-        public List<string> ViewerPoolList = new List<string>();
+        public List<string> ViewerPoolList { get; set; } = new List<string>();
+        public List<GTA_User> GTAPoolList { get; set; } = new List<GTA_User>();
+
+        private BindingSource bS = new BindingSource();
+        private BindingList<GTA_User> GTAList /*= new BindingList<GTA_User>()*/;
+
         private string SelectedUser = "";
 
         public SHubMain(SHubConfig cfg)
@@ -35,6 +41,7 @@ namespace StreamHub
             InitializeComponent();
 
             client = new TwitchClient();
+            cfg = cfg ?? new SHubConfig();
             config = cfg;
 
             if (!config.isSetup())
@@ -72,6 +79,12 @@ namespace StreamHub
                 Debug.WriteLine(e);
             }
 
+            //GTAList = GTAList ?? new List<GTA_User>();
+            c_GTAPool.AutoGenerateColumns = true;
+
+            GTAList = new BindingList<GTA_User>(GTAPoolList);
+            BindingSource source = new BindingSource(GTAList, null);
+            c_GTAPool.DataSource = source;
         }
 
         private void Client_OnLog(object sender, TwitchLib.Client.Events.OnLogArgs e)
@@ -92,7 +105,7 @@ namespace StreamHub
 
         private void Client_OnMessageReceived(object sender, OnMessageReceivedArgs e)
         {
-            /* ViewerPool */
+            /* vvv ViewerPool vvv */
             if (ViewerPool_Status && e.ChatMessage.Message == config.CommandSymbol + config.ViewerPool_RegisterCommand)
             {
                 if (ViewerPoolList.Contains(e.ChatMessage.Username))
@@ -137,6 +150,23 @@ namespace StreamHub
             }
 
             /* ^^^ ViewerPool ^^^ */
+            /* vvv Gameveiwer Team Assembler vvv */
+
+            if (config.GTA_roles.Exists(x => x.command == e.ChatMessage.Message.TrimStart(char.Parse(config.CommandSymbol))) 
+                && GTA_status && !GTAPoolList.Exists(x => x.userName == e.ChatMessage.Username))
+            {
+                Role r = config.GTA_roles.FindLast(x => x.command == e.ChatMessage.Message.TrimStart(char.Parse(config.CommandSymbol)));
+                GTA_User u = new GTA_User() { userName = e.ChatMessage.Username, role = r, selected = false};
+                Invoke(new Action(() => GTAList.Add(u)));
+                client.SendMessage(e.ChatMessage.Channel, $"{e.ChatMessage.Username} is registred as {r.name} in Gameviewer queue.");
+            }
+            if (config.GTA_roles.Exists(x => x.command == e.ChatMessage.Message.TrimStart(char.Parse(config.CommandSymbol)))
+                && GTA_status && GTAPoolList.Exists(x => x.userName == e.ChatMessage.Username))
+            {
+                client.SendWhisper(e.ChatMessage.Username, "You are already registred in queue.");
+            }
+            
+            /* ^^^ Gameveiwer Team Assembler ^^^ */
         }
 
         public void UpdateObsFiles()
@@ -222,6 +252,27 @@ namespace StreamHub
             string msg = $"{c_ViewerPool.Items[selected]}, c'est ton tour de briller ! Tu es maintenant le responsable du PNJ !";
             client.SendMessage(channel, msg);
             client.SendWhisper(c_ViewerPool.Items[selected].ToString(), msg);
+        }
+
+        private void c_GTA_startstop_Click(object sender, EventArgs e)
+        {
+            if (GTA_status)
+            {
+                c_GTA_startstop.ForeColor = Color.Red;
+                GTA_status = false;
+                client.SendMessage(channel, "Gameviewer queue Stopped");
+            }
+            else
+            {
+                c_GTA_startstop.ForeColor = Color.Green;
+                GTA_status = true;
+                client.SendMessage(channel, "Gameviewer queue Started");
+            }
+        }
+
+        private void c_GTA_selectUser_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

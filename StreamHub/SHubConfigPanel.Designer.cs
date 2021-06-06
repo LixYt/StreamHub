@@ -50,20 +50,21 @@ namespace StreamHub
             this.c_CommandSymbol = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.label8 = new System.Windows.Forms.Label();
+            this.c_roles = new System.Windows.Forms.DataGridView();
             this.radioButton4 = new System.Windows.Forms.RadioButton();
             this.radioButton3 = new System.Windows.Forms.RadioButton();
             this.radioButton2 = new System.Windows.Forms.RadioButton();
             this.radioButton1 = new System.Windows.Forms.RadioButton();
-            this.label8 = new System.Windows.Forms.Label();
-            this.button4 = new System.Windows.Forms.Button();
-            this.button3 = new System.Windows.Forms.Button();
+            this.c_RemoveRole = new System.Windows.Forms.Button();
+            this.c_AddRole = new System.Windows.Forms.Button();
             this.label7 = new System.Windows.Forms.Label();
-            this.listView1 = new System.Windows.Forms.ListView();
             this.c_BotName = new System.Windows.Forms.TextBox();
             this.label9 = new System.Windows.Forms.Label();
             this.GetToken = new System.Windows.Forms.LinkLabel();
             this.groupBox3.SuspendLayout();
             this.groupBox4.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.c_roles)).BeginInit();
             this.SuspendLayout();
             // 
             // c_Save
@@ -258,48 +259,73 @@ namespace StreamHub
             // 
             // groupBox4
             // 
+            this.groupBox4.Controls.Add(this.label8);
+            this.groupBox4.Controls.Add(this.c_roles);
             this.groupBox4.Controls.Add(this.radioButton4);
             this.groupBox4.Controls.Add(this.radioButton3);
             this.groupBox4.Controls.Add(this.radioButton2);
             this.groupBox4.Controls.Add(this.radioButton1);
-            this.groupBox4.Controls.Add(this.label8);
-            this.groupBox4.Controls.Add(this.button4);
-            this.groupBox4.Controls.Add(this.button3);
+            this.groupBox4.Controls.Add(this.c_RemoveRole);
+            this.groupBox4.Controls.Add(this.c_AddRole);
             this.groupBox4.Controls.Add(this.label7);
-            this.groupBox4.Controls.Add(this.listView1);
             this.groupBox4.Location = new System.Drawing.Point(13, 329);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(383, 234);
+            this.groupBox4.Size = new System.Drawing.Size(619, 234);
             this.groupBox4.TabIndex = 15;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Gameviewer Team Assembler";
             // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point);
+            this.label8.Location = new System.Drawing.Point(494, 23);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(89, 15);
+            this.label8.TabIndex = 10;
+            this.label8.Text = "Selection mode";
+            // 
+            // c_roles
+            // 
+            this.c_roles.AllowUserToAddRows = false;
+            this.c_roles.AllowUserToDeleteRows = false;
+            this.c_roles.AllowUserToOrderColumns = true;
+            this.c_roles.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.c_roles.Location = new System.Drawing.Point(7, 42);
+            this.c_roles.Name = "c_roles";
+            this.c_roles.ReadOnly = true;
+            this.c_roles.RowTemplate.Height = 25;
+            this.c_roles.Size = new System.Drawing.Size(464, 150);
+            this.c_roles.TabIndex = 9;
+            // 
             // radioButton4
             // 
             this.radioButton4.AutoSize = true;
-            this.radioButton4.Location = new System.Drawing.Point(174, 199);
+            this.radioButton4.Enabled = false;
+            this.radioButton4.Location = new System.Drawing.Point(495, 126);
             this.radioButton4.Name = "radioButton4";
             this.radioButton4.Size = new System.Drawing.Size(110, 19);
             this.radioButton4.TabIndex = 8;
-            this.radioButton4.TabStop = true;
             this.radioButton4.Text = "Last In, First Out";
             this.radioButton4.UseVisualStyleBackColor = true;
             // 
             // radioButton3
             // 
             this.radioButton3.AutoSize = true;
-            this.radioButton3.Location = new System.Drawing.Point(174, 174);
+            this.radioButton3.Enabled = false;
+            this.radioButton3.Location = new System.Drawing.Point(495, 101);
             this.radioButton3.Name = "radioButton3";
             this.radioButton3.Size = new System.Drawing.Size(111, 19);
             this.radioButton3.TabIndex = 7;
-            this.radioButton3.TabStop = true;
             this.radioButton3.Text = "First In, First Out";
             this.radioButton3.UseVisualStyleBackColor = true;
             // 
             // radioButton2
             // 
             this.radioButton2.AutoSize = true;
-            this.radioButton2.Location = new System.Drawing.Point(173, 149);
+            this.radioButton2.Checked = true;
+            this.radioButton2.Enabled = false;
+            this.radioButton2.Location = new System.Drawing.Point(494, 76);
             this.radioButton2.Name = "radioButton2";
             this.radioButton2.Size = new System.Drawing.Size(90, 19);
             this.radioButton2.TabIndex = 6;
@@ -310,40 +336,32 @@ namespace StreamHub
             // radioButton1
             // 
             this.radioButton1.AutoSize = true;
-            this.radioButton1.Location = new System.Drawing.Point(173, 123);
+            this.radioButton1.Enabled = false;
+            this.radioButton1.Location = new System.Drawing.Point(494, 50);
             this.radioButton1.Name = "radioButton1";
             this.radioButton1.Size = new System.Drawing.Size(109, 19);
             this.radioButton1.TabIndex = 5;
-            this.radioButton1.TabStop = true;
             this.radioButton1.Text = "Random by role";
             this.radioButton1.UseVisualStyleBackColor = true;
             // 
-            // label8
+            // c_RemoveRole
             // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(106, 77);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(212, 15);
-            this.label8.TabIndex = 4;
-            this.label8.Text = "role + comande + quantité dans le role";
+            this.c_RemoveRole.Location = new System.Drawing.Point(87, 204);
+            this.c_RemoveRole.Name = "c_RemoveRole";
+            this.c_RemoveRole.Size = new System.Drawing.Size(75, 23);
+            this.c_RemoveRole.TabIndex = 3;
+            this.c_RemoveRole.Text = "Remove";
+            this.c_RemoveRole.UseVisualStyleBackColor = true;
             // 
-            // button4
+            // c_AddRole
             // 
-            this.button4.Location = new System.Drawing.Point(87, 204);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(75, 23);
-            this.button4.TabIndex = 3;
-            this.button4.Text = "Remove";
-            this.button4.UseVisualStyleBackColor = true;
-            // 
-            // button3
-            // 
-            this.button3.Location = new System.Drawing.Point(6, 205);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(75, 23);
-            this.button3.TabIndex = 2;
-            this.button3.Text = "New";
-            this.button3.UseVisualStyleBackColor = true;
+            this.c_AddRole.Location = new System.Drawing.Point(6, 205);
+            this.c_AddRole.Name = "c_AddRole";
+            this.c_AddRole.Size = new System.Drawing.Size(75, 23);
+            this.c_AddRole.TabIndex = 2;
+            this.c_AddRole.Text = "New";
+            this.c_AddRole.UseVisualStyleBackColor = true;
+            this.c_AddRole.Click += new System.EventHandler(this.c_AddRole_Click);
             // 
             // label7
             // 
@@ -353,15 +371,6 @@ namespace StreamHub
             this.label7.Size = new System.Drawing.Size(35, 15);
             this.label7.TabIndex = 1;
             this.label7.Text = "Roles";
-            // 
-            // listView1
-            // 
-            this.listView1.HideSelection = false;
-            this.listView1.Location = new System.Drawing.Point(5, 47);
-            this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(157, 151);
-            this.listView1.TabIndex = 0;
-            this.listView1.UseCompatibleStateImageBehavior = false;
             // 
             // c_BotName
             // 
@@ -420,6 +429,7 @@ namespace StreamHub
             this.groupBox3.PerformLayout();
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.c_roles)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -446,10 +456,8 @@ namespace StreamHub
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.Button button4;
-        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Button c_AddRoke;
         private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.ListView listView1;
-        private System.Windows.Forms.Label label8;
         private System.Windows.Forms.CheckBox checkBox3;
         private System.Windows.Forms.RadioButton radioButton3;
         private System.Windows.Forms.RadioButton radioButton2;
@@ -464,5 +472,9 @@ namespace StreamHub
         private System.Windows.Forms.TextBox c_ViewerPool_RegisterCommand;
         private System.Windows.Forms.Button c_Save;
         private System.Windows.Forms.LinkLabel GetToken;
+        private System.Windows.Forms.Button c_AddRole;
+        private System.Windows.Forms.Button c_RemoveRole;
+        private System.Windows.Forms.DataGridView c_roles;
+        private System.Windows.Forms.Label label8;
     }
 }

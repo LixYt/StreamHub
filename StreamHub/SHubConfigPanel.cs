@@ -28,6 +28,12 @@ namespace StreamHub
             c_ViewerPool_SubBonusByTiers.Checked = SHubConfiguration.ViewerPool_SubBonusByTiers;
             c_ViewerPool_RegisterCommand.Text = SHubConfiguration.ViewerPool_RegisterCommand;
             c_ViewerPool_CanRollDice.Checked = SHubConfiguration.ViewerPool_CanRollDice;
+
+            SHubConfiguration.GTA_roles = SHubConfiguration.GTA_roles ?? new List<Role>();
+            BindingList<Role> bL = new BindingList<Role>(SHubConfiguration.GTA_roles);
+            BindingSource bS = new BindingSource();
+            bS.DataSource = bL;
+            c_roles.DataSource = bS;
         }
 
         private void c_Save_Click(object sender, EventArgs e)
@@ -55,6 +61,15 @@ namespace StreamHub
             MessageBox.Show("Choose 'Custom Scope Token' and keep the information generated in safe place.\r\n" +
                 "Check all Helix scope and uncheck all V5 scope.\r\n" +
                 "Once Gathered, put this information in the software.");
+        }
+
+        private void c_AddRole_Click(object sender, EventArgs e)
+        {
+            GTA_newRole f = new GTA_newRole();
+            if (f.ShowDialog() == DialogResult.OK)
+            {
+                SHubConfiguration.GTA_roles.Add(new Role() { command = f.command, name = f.name, nbr = f.number });
+            }
         }
     }
 }
