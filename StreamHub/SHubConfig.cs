@@ -26,7 +26,7 @@ namespace StreamHub
         public bool ViewerPool_CanRollDice = false;
 
         public List<Role> GTA_roles = new List<Role>();
-         
+        public string GTA_mode = ""; 
 
         public SHubConfig()
         {

@@ -52,10 +52,10 @@ namespace StreamHub
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.label8 = new System.Windows.Forms.Label();
             this.c_roles = new System.Windows.Forms.DataGridView();
-            this.radioButton4 = new System.Windows.Forms.RadioButton();
-            this.radioButton3 = new System.Windows.Forms.RadioButton();
-            this.radioButton2 = new System.Windows.Forms.RadioButton();
-            this.radioButton1 = new System.Windows.Forms.RadioButton();
+            this.c_GTA_modeLIFO = new System.Windows.Forms.RadioButton();
+            this.c_GTA_modeFIFO = new System.Windows.Forms.RadioButton();
+            this.c_GTA_mode_Rfull = new System.Windows.Forms.RadioButton();
+            this.c_GTA_modeRR = new System.Windows.Forms.RadioButton();
             this.c_RemoveRole = new System.Windows.Forms.Button();
             this.c_AddRole = new System.Windows.Forms.Button();
             this.label7 = new System.Windows.Forms.Label();
@@ -261,10 +261,10 @@ namespace StreamHub
             // 
             this.groupBox4.Controls.Add(this.label8);
             this.groupBox4.Controls.Add(this.c_roles);
-            this.groupBox4.Controls.Add(this.radioButton4);
-            this.groupBox4.Controls.Add(this.radioButton3);
-            this.groupBox4.Controls.Add(this.radioButton2);
-            this.groupBox4.Controls.Add(this.radioButton1);
+            this.groupBox4.Controls.Add(this.c_GTA_modeLIFO);
+            this.groupBox4.Controls.Add(this.c_GTA_modeFIFO);
+            this.groupBox4.Controls.Add(this.c_GTA_mode_Rfull);
+            this.groupBox4.Controls.Add(this.c_GTA_modeRR);
             this.groupBox4.Controls.Add(this.c_RemoveRole);
             this.groupBox4.Controls.Add(this.c_AddRole);
             this.groupBox4.Controls.Add(this.label7);
@@ -298,55 +298,55 @@ namespace StreamHub
             this.c_roles.Size = new System.Drawing.Size(464, 150);
             this.c_roles.TabIndex = 9;
             // 
-            // radioButton4
+            // c_GTA_modeLIFO
             // 
-            this.radioButton4.AutoSize = true;
-            this.radioButton4.Enabled = false;
-            this.radioButton4.Location = new System.Drawing.Point(495, 126);
-            this.radioButton4.Name = "radioButton4";
-            this.radioButton4.Size = new System.Drawing.Size(110, 19);
-            this.radioButton4.TabIndex = 8;
-            this.radioButton4.Text = "Last In, First Out";
-            this.radioButton4.UseVisualStyleBackColor = true;
+            this.c_GTA_modeLIFO.AutoSize = true;
+            this.c_GTA_modeLIFO.Location = new System.Drawing.Point(495, 126);
+            this.c_GTA_modeLIFO.Name = "c_GTA_modeLIFO";
+            this.c_GTA_modeLIFO.Size = new System.Drawing.Size(110, 19);
+            this.c_GTA_modeLIFO.TabIndex = 8;
+            this.c_GTA_modeLIFO.Text = "Last In, First Out";
+            this.c_GTA_modeLIFO.UseVisualStyleBackColor = true;
+            this.c_GTA_modeLIFO.CheckedChanged += new System.EventHandler(this.c_GTA_modeLIFO_CheckedChanged);
             // 
-            // radioButton3
+            // c_GTA_modeFIFO
             // 
-            this.radioButton3.AutoSize = true;
-            this.radioButton3.Enabled = false;
-            this.radioButton3.Location = new System.Drawing.Point(495, 101);
-            this.radioButton3.Name = "radioButton3";
-            this.radioButton3.Size = new System.Drawing.Size(111, 19);
-            this.radioButton3.TabIndex = 7;
-            this.radioButton3.Text = "First In, First Out";
-            this.radioButton3.UseVisualStyleBackColor = true;
+            this.c_GTA_modeFIFO.AutoSize = true;
+            this.c_GTA_modeFIFO.Location = new System.Drawing.Point(495, 101);
+            this.c_GTA_modeFIFO.Name = "c_GTA_modeFIFO";
+            this.c_GTA_modeFIFO.Size = new System.Drawing.Size(111, 19);
+            this.c_GTA_modeFIFO.TabIndex = 7;
+            this.c_GTA_modeFIFO.Text = "First In, First Out";
+            this.c_GTA_modeFIFO.UseVisualStyleBackColor = true;
+            this.c_GTA_modeFIFO.CheckedChanged += new System.EventHandler(this.c_GTA_modeLIFO_CheckedChanged);
             // 
-            // radioButton2
+            // c_GTA_mode_Rfull
             // 
-            this.radioButton2.AutoSize = true;
-            this.radioButton2.Checked = true;
-            this.radioButton2.Enabled = false;
-            this.radioButton2.Location = new System.Drawing.Point(494, 76);
-            this.radioButton2.Name = "radioButton2";
-            this.radioButton2.Size = new System.Drawing.Size(90, 19);
-            this.radioButton2.TabIndex = 6;
-            this.radioButton2.TabStop = true;
-            this.radioButton2.Text = "Random full";
-            this.radioButton2.UseVisualStyleBackColor = true;
+            this.c_GTA_mode_Rfull.AutoSize = true;
+            this.c_GTA_mode_Rfull.Checked = true;
+            this.c_GTA_mode_Rfull.Location = new System.Drawing.Point(494, 76);
+            this.c_GTA_mode_Rfull.Name = "c_GTA_mode_Rfull";
+            this.c_GTA_mode_Rfull.Size = new System.Drawing.Size(90, 19);
+            this.c_GTA_mode_Rfull.TabIndex = 6;
+            this.c_GTA_mode_Rfull.TabStop = true;
+            this.c_GTA_mode_Rfull.Text = "Random full";
+            this.c_GTA_mode_Rfull.UseVisualStyleBackColor = true;
+            this.c_GTA_mode_Rfull.CheckedChanged += new System.EventHandler(this.c_GTA_modeLIFO_CheckedChanged);
             // 
-            // radioButton1
+            // c_GTA_modeRR
             // 
-            this.radioButton1.AutoSize = true;
-            this.radioButton1.Enabled = false;
-            this.radioButton1.Location = new System.Drawing.Point(494, 50);
-            this.radioButton1.Name = "radioButton1";
-            this.radioButton1.Size = new System.Drawing.Size(109, 19);
-            this.radioButton1.TabIndex = 5;
-            this.radioButton1.Text = "Random by role";
-            this.radioButton1.UseVisualStyleBackColor = true;
+            this.c_GTA_modeRR.AutoSize = true;
+            this.c_GTA_modeRR.Location = new System.Drawing.Point(494, 50);
+            this.c_GTA_modeRR.Name = "c_GTA_modeRR";
+            this.c_GTA_modeRR.Size = new System.Drawing.Size(109, 19);
+            this.c_GTA_modeRR.TabIndex = 5;
+            this.c_GTA_modeRR.Text = "Random by role";
+            this.c_GTA_modeRR.UseVisualStyleBackColor = true;
+            this.c_GTA_modeRR.CheckedChanged += new System.EventHandler(this.c_GTA_modeLIFO_CheckedChanged);
             // 
             // c_RemoveRole
             // 
-            this.c_RemoveRole.Location = new System.Drawing.Point(87, 204);
+            this.c_RemoveRole.Location = new System.Drawing.Point(87, 197);
             this.c_RemoveRole.Name = "c_RemoveRole";
             this.c_RemoveRole.Size = new System.Drawing.Size(75, 23);
             this.c_RemoveRole.TabIndex = 3;
@@ -355,7 +355,7 @@ namespace StreamHub
             // 
             // c_AddRole
             // 
-            this.c_AddRole.Location = new System.Drawing.Point(6, 205);
+            this.c_AddRole.Location = new System.Drawing.Point(6, 198);
             this.c_AddRole.Name = "c_AddRole";
             this.c_AddRole.Size = new System.Drawing.Size(75, 23);
             this.c_AddRole.TabIndex = 2;
@@ -459,10 +459,10 @@ namespace StreamHub
         private System.Windows.Forms.Button c_AddRoke;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.CheckBox checkBox3;
-        private System.Windows.Forms.RadioButton radioButton3;
+        private System.Windows.Forms.RadioButton c_GTA_modeFIFO;
         private System.Windows.Forms.RadioButton radioButton2;
-        private System.Windows.Forms.RadioButton radioButton1;
-        private System.Windows.Forms.RadioButton radioButton4;
+        private System.Windows.Forms.RadioButton c_GTA_modeRR;
+        private System.Windows.Forms.RadioButton c_GTA_modeLIFO;
         private System.Windows.Forms.TextBox textBox7;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.TextBox c_ChannelName;
@@ -476,5 +476,6 @@ namespace StreamHub
         private System.Windows.Forms.Button c_RemoveRole;
         private System.Windows.Forms.DataGridView c_roles;
         private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.RadioButton c_GTA_mode_Rfull;
     }
 }

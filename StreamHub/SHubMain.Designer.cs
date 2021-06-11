@@ -41,6 +41,7 @@ namespace StreamHub
             this.c_GTA_Auto = new System.Windows.Forms.Button();
             this.c_GTA_Reset = new System.Windows.Forms.Button();
             this.c_GTA_startstop = new System.Windows.Forms.Button();
+            this.c_ResetSelection = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.c_GTAPool)).BeginInit();
@@ -121,6 +122,7 @@ namespace StreamHub
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.c_ResetSelection);
             this.groupBox2.Controls.Add(this.c_GTAPool);
             this.groupBox2.Controls.Add(this.c_GTA_Auto);
             this.groupBox2.Controls.Add(this.c_GTA_Reset);
@@ -147,10 +149,11 @@ namespace StreamHub
             // 
             this.c_GTA_Auto.Location = new System.Drawing.Point(6, 51);
             this.c_GTA_Auto.Name = "c_GTA_Auto";
-            this.c_GTA_Auto.Size = new System.Drawing.Size(225, 23);
+            this.c_GTA_Auto.Size = new System.Drawing.Size(122, 23);
             this.c_GTA_Auto.TabIndex = 11;
             this.c_GTA_Auto.Text = "Build a team";
             this.c_GTA_Auto.UseVisualStyleBackColor = true;
+            this.c_GTA_Auto.Click += new System.EventHandler(this.c_GTA_Auto_Click);
             // 
             // c_GTA_Reset
             // 
@@ -160,6 +163,7 @@ namespace StreamHub
             this.c_GTA_Reset.TabIndex = 10;
             this.c_GTA_Reset.Text = "Reset";
             this.c_GTA_Reset.UseVisualStyleBackColor = true;
+            this.c_GTA_Reset.Click += new System.EventHandler(this.c_GTA_Reset_Click);
             // 
             // c_GTA_startstop
             // 
@@ -171,6 +175,16 @@ namespace StreamHub
             this.c_GTA_startstop.Text = "Start /Stop Assembler";
             this.c_GTA_startstop.UseVisualStyleBackColor = true;
             this.c_GTA_startstop.Click += new System.EventHandler(this.c_GTA_startstop_Click);
+            // 
+            // c_ResetSelection
+            // 
+            this.c_ResetSelection.Location = new System.Drawing.Point(134, 51);
+            this.c_ResetSelection.Name = "c_ResetSelection";
+            this.c_ResetSelection.Size = new System.Drawing.Size(97, 23);
+            this.c_ResetSelection.TabIndex = 11;
+            this.c_ResetSelection.Text = "Reset Selection";
+            this.c_ResetSelection.UseVisualStyleBackColor = true;
+            this.c_ResetSelection.Click += new System.EventHandler(this.c_ResetSelection_Click);
             // 
             // SHubMain
             // 
@@ -205,5 +219,6 @@ namespace StreamHub
         private System.Windows.Forms.Button c_viewerpool_startstop;
         private System.Windows.Forms.Button c_GTA_startstop;
         private System.Windows.Forms.DataGridView c_GTAPool;
+        private System.Windows.Forms.Button c_ResetSelection;
     }
 }

@@ -29,6 +29,14 @@ namespace StreamHub
             c_ViewerPool_RegisterCommand.Text = SHubConfiguration.ViewerPool_RegisterCommand;
             c_ViewerPool_CanRollDice.Checked = SHubConfiguration.ViewerPool_CanRollDice;
 
+            switch (SHubConfiguration.GTA_mode)
+            {
+                case "c_GTA_modeFIFO": c_GTA_modeFIFO.Checked = true; break;
+                case "c_GTA_modeLIFO": c_GTA_modeLIFO.Checked = true; break;
+                case "c_GTA_modeRR": c_GTA_modeRR.Checked = true; break;
+                case "c_GTA_mode_Rfull": c_GTA_mode_Rfull.Checked = true; break;
+            }
+
             SHubConfiguration.GTA_roles = SHubConfiguration.GTA_roles ?? new List<Role>();
             BindingList<Role> bL = new BindingList<Role>(SHubConfiguration.GTA_roles);
             BindingSource bS = new BindingSource();
@@ -48,6 +56,11 @@ namespace StreamHub
             SHubConfiguration.ViewerPool_SubBonusByTiers = c_ViewerPool_SubBonusByTiers.Checked;
             SHubConfiguration.ViewerPool_RegisterCommand = c_ViewerPool_RegisterCommand.Text;
             SHubConfiguration.ViewerPool_CanRollDice = c_ViewerPool_CanRollDice.Checked;
+
+            if (c_GTA_modeFIFO.Checked) SHubConfiguration.GTA_mode = c_GTA_modeFIFO.Name;
+            if (c_GTA_modeLIFO.Checked) SHubConfiguration.GTA_mode = c_GTA_modeLIFO.Name;
+            if (c_GTA_modeRR.Checked) SHubConfiguration.GTA_mode = c_GTA_modeRR.Name;
+            if (c_GTA_mode_Rfull.Checked) SHubConfiguration.GTA_mode = c_GTA_mode_Rfull.Name;
         }
 
         private void SHubConfigPanel_FormClosed(object sender, FormClosedEventArgs e)
@@ -70,6 +83,14 @@ namespace StreamHub
             {
                 SHubConfiguration.GTA_roles.Add(new Role() { command = f.command, name = f.name, nbr = f.number });
             }
+        }
+
+        private void c_GTA_modeLIFO_CheckedChanged(object sender, EventArgs e)
+        {
+            if (c_GTA_modeFIFO.Checked) SHubConfiguration.GTA_mode = c_GTA_modeFIFO.Name;
+            if (c_GTA_modeLIFO.Checked) SHubConfiguration.GTA_mode = c_GTA_modeLIFO.Name;
+            if (c_GTA_modeRR.Checked) SHubConfiguration.GTA_mode = c_GTA_modeRR.Name;
+            if (c_GTA_mode_Rfull.Checked) SHubConfiguration.GTA_mode = c_GTA_mode_Rfull.Name;
         }
     }
 }

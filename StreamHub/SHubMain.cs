@@ -85,6 +85,8 @@ namespace StreamHub
             GTAList = new BindingList<GTA_User>(GTAPoolList);
             BindingSource source = new BindingSource(GTAList, null);
             c_GTAPool.DataSource = source;
+
+            UpdateObsFiles();
         }
 
         private void Client_OnLog(object sender, TwitchLib.Client.Events.OnLogArgs e)
@@ -150,6 +152,7 @@ namespace StreamHub
             }
 
             /* ^^^ ViewerPool ^^^ */
+
             /* vvv Gameveiwer Team Assembler vvv */
 
             if (config.GTA_roles.Exists(x => x.command == e.ChatMessage.Message.TrimStart(char.Parse(config.CommandSymbol))) 
@@ -159,6 +162,7 @@ namespace StreamHub
                 GTA_User u = new GTA_User() { userName = e.ChatMessage.Username, role = r, selected = false};
                 Invoke(new Action(() => GTAList.Add(u)));
                 client.SendMessage(e.ChatMessage.Channel, $"{e.ChatMessage.Username} is registred as {r.name} in Gameviewer queue.");
+                UpdateObsFiles();
             }
             if (config.GTA_roles.Exists(x => x.command == e.ChatMessage.Message.TrimStart(char.Parse(config.CommandSymbol)))
                 && GTA_status && GTAPoolList.Exists(x => x.userName == e.ChatMessage.Username))
@@ -171,8 +175,10 @@ namespace StreamHub
 
         public void UpdateObsFiles()
         {
+            if (!Directory.Exists("OBS")) Directory.CreateDirectory("OBS");
+
             /* ViewerPool current list */
-            using (StreamWriter sw = File.CreateText("OBS_ViewerPool.txt"))
+            using (StreamWriter sw = File.CreateText("OBS/ViewerPool.txt"))
             {
                 string ViewerPoolTxt = "";
                 foreach(string s in c_ViewerPool.Items)
@@ -182,7 +188,25 @@ namespace StreamHub
                 sw.WriteLine(ViewerPoolTxt);
             }
 
+            using (StreamWriter sw = File.CreateText("OBS/GTAPoolList.txt"))
+            {
+                string GTAPool = "";
+                foreach (GTA_User u in GTAPoolList)
+                {
+                    GTAPool += $"{u.userName} ({u.role.name})\r\n";
+                }
+                sw.WriteLine(GTAPool);
+            }
 
+            using (StreamWriter sw = File.CreateText("OBS/GTAPoolConfig.txt"))
+            {
+                string GTAConfig = $"Selection mode is {config.GTA_mode.Replace("c_", "")} \r\n";
+                foreach (Role r in config.GTA_roles)
+                {
+                    GTAConfig += $"For {r.name} : use command {config.CommandSymbol}{r.command}. {r.nbr} will be picked.\r\n";
+                }
+                sw.WriteLine(GTAConfig);
+            }
         }
 
         private void Client_OnWhisperReceived(object sender, OnWhisperReceivedArgs e)
@@ -270,9 +294,125 @@ namespace StreamHub
             }
         }
 
-        private void c_GTA_selectUser_Click(object sender, EventArgs e)
+        private void c_GTA_Auto_Click(object sender, EventArgs e)
         {
+            if (GTA_status) return;
+            switch (config.GTA_mode)
+            {
+                case "c_GTA_modeFIFO":
+                    GTA_FIFO();
+                    break;
 
+                case "c_GTA_modeLIFO":
+                    GTA_LIFO();
+                    break;
+
+                case "c_GTA_modeRR":
+                    GTA_RandomByRole();
+                    break;
+
+                case "c_GTA_mode_Rfull":
+                default:
+                    GTA_FullRandom();
+                    break;
+            }
+
+            if (GTAPoolList.FindAll(x => x.selected).Count > 0)
+            {
+                string SelectedPlayers = "";
+                foreach (GTA_User u in GTAPoolList.FindAll(x => x.selected)) { SelectedPlayers += $"{u.userName},"; }
+                client.SendMessage(channel, $"Gameviewer will start with the following players : {SelectedPlayers.TrimEnd(',')}.");
+            }
+        }
+
+        private void GTA_FullRandom()
+        {
+            int nbPlayers = 0;
+            foreach(Role r in config.GTA_roles)
+            {
+                nbPlayers += r.nbr;
+            }
+
+            Random rand = new Random();
+
+            int SelectedPlayersCount = GTAPoolList.FindAll(x => x.selected).Count;
+            int NotSelectedPlayersCount = GTAPoolList.FindAll(x => !x.selected).Count;
+
+            while (SelectedPlayersCount <= nbPlayers && NotSelectedPlayersCount > 0)
+            {
+                int i = rand.Next(0, GTAPoolList.FindAll(x => !x.selected).Count-1);
+                GTAPoolList.FindAll(x => !x.selected)[i].selected = true;
+                                
+                SelectedPlayersCount = GTAPoolList.FindAll(x => x.selected).Count;
+                NotSelectedPlayersCount = GTAPoolList.FindAll(x => !x.selected).Count;
+            }
+        }
+
+        private void GTA_RandomByRole()
+        {
+            Random rand = new Random();
+
+            foreach (Role role in config.GTA_roles)
+            {
+                int SelectedPlayersCount = GTAPoolList.FindAll(x => x.selected && x.role.name == role.name).Count;
+                int NotSelectedPlayersCount = GTAPoolList.FindAll(x => !x.selected && x.role.name == role.name).Count;
+
+                while (SelectedPlayersCount <= role.nbr && NotSelectedPlayersCount > 0)
+                {
+                    int i = rand.Next(0, NotSelectedPlayersCount - 1);
+                    GTAPoolList.FindAll(x => !x.selected && x.role.name == role.name)[i].selected = true;
+
+                    SelectedPlayersCount = GTAPoolList.FindAll(x => x.selected && x.role.name == role.name).Count;
+                    NotSelectedPlayersCount = GTAPoolList.FindAll(x => !x.selected && x.role.name == role.name).Count;
+                }
+            }
+        }
+
+        private void GTA_FIFO()
+        {
+            foreach (Role role in config.GTA_roles)
+            {
+                int SelectedPlayersCount = GTAPoolList.FindAll(x => x.selected && x.role.name == role.name).Count;
+                int NotSelectedPlayersCount = GTAPoolList.FindAll(x => !x.selected && x.role.name == role.name).Count;
+
+                while (SelectedPlayersCount <= role.nbr && NotSelectedPlayersCount > 0)
+                {
+                    GTAPoolList.FindAll(x => !x.selected && x.role.name == role.name)[0].selected = true;
+
+                    SelectedPlayersCount = GTAPoolList.FindAll(x => x.selected && x.role.name == role.name).Count;
+                    NotSelectedPlayersCount = GTAPoolList.FindAll(x => !x.selected && x.role.name == role.name).Count;
+                }
+            }
+        }
+
+        private void GTA_LIFO()
+        {
+            foreach (Role role in config.GTA_roles)
+            {
+                int SelectedPlayersCount = GTAPoolList.FindAll(x => x.selected && x.role.name == role.name).Count;
+                int NotSelectedPlayersCount = GTAPoolList.FindAll(x => !x.selected && x.role.name == role.name).Count;
+
+                while (SelectedPlayersCount <= role.nbr && NotSelectedPlayersCount > 0)
+                {
+                    int i = GTAPoolList.FindAll(x => !x.selected && x.role.name == role.name).Count;
+                    GTAPoolList.FindAll(x => !x.selected && x.role.name == role.name)[i - 1].selected = true;
+
+                    SelectedPlayersCount = GTAPoolList.FindAll(x => x.selected && x.role.name == role.name).Count;
+                    NotSelectedPlayersCount = GTAPoolList.FindAll(x => !x.selected && x.role.name == role.name).Count;
+                }
+            }
+        }
+
+        private void c_ResetSelection_Click(object sender, EventArgs e)
+        {
+            if (GTA_status) return;
+            GTAPoolList.ForEach(x => x.selected = false);
+        }
+
+        private void c_GTA_Reset_Click(object sender, EventArgs e)
+        {
+            if (GTA_status) return;
+            GTAList.Clear();
         }
     }
 }
