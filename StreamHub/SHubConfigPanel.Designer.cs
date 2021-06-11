@@ -290,11 +290,14 @@ namespace StreamHub
             this.c_roles.AllowUserToAddRows = false;
             this.c_roles.AllowUserToDeleteRows = false;
             this.c_roles.AllowUserToOrderColumns = true;
+            this.c_roles.AllowUserToResizeRows = false;
             this.c_roles.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.c_roles.Location = new System.Drawing.Point(7, 42);
+            this.c_roles.MultiSelect = false;
             this.c_roles.Name = "c_roles";
             this.c_roles.ReadOnly = true;
             this.c_roles.RowTemplate.Height = 25;
+            this.c_roles.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.c_roles.Size = new System.Drawing.Size(464, 150);
             this.c_roles.TabIndex = 9;
             // 
@@ -352,6 +355,7 @@ namespace StreamHub
             this.c_RemoveRole.TabIndex = 3;
             this.c_RemoveRole.Text = "Remove";
             this.c_RemoveRole.UseVisualStyleBackColor = true;
+            this.c_RemoveRole.Click += new System.EventHandler(this.c_RemoveRole_Click);
             // 
             // c_AddRole
             // 

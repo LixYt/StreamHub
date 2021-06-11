@@ -31,7 +31,6 @@ namespace StreamHub
         public List<string> ViewerPoolList { get; set; } = new List<string>();
         public List<GTA_User> GTAPoolList { get; set; } = new List<GTA_User>();
 
-        private BindingSource bS = new BindingSource();
         private BindingList<GTA_User> GTAList /*= new BindingList<GTA_User>()*/;
 
         private string SelectedUser = "";

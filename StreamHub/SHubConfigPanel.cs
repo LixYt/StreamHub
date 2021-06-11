@@ -12,6 +12,8 @@ namespace StreamHub
     {
         SHubConfig SHubConfiguration;
 
+        private BindingList<Role> GTARoles;
+
         public SHubConfigPanel(SHubConfig config)
         {            
             InitializeComponent();
@@ -37,11 +39,10 @@ namespace StreamHub
                 case "c_GTA_mode_Rfull": c_GTA_mode_Rfull.Checked = true; break;
             }
 
-            SHubConfiguration.GTA_roles = SHubConfiguration.GTA_roles ?? new List<Role>();
-            BindingList<Role> bL = new BindingList<Role>(SHubConfiguration.GTA_roles);
-            BindingSource bS = new BindingSource();
-            bS.DataSource = bL;
-            c_roles.DataSource = bS;
+            GTARoles = new BindingList<Role>(SHubConfiguration.GTA_roles);
+            SHubConfiguration.GTA_roles ??= new List<Role>();
+            BindingSource source = new BindingSource(GTARoles, null);
+            c_roles.DataSource = source;
         }
 
         private void c_Save_Click(object sender, EventArgs e)
@@ -81,7 +82,7 @@ namespace StreamHub
             GTA_newRole f = new GTA_newRole();
             if (f.ShowDialog() == DialogResult.OK)
             {
-                SHubConfiguration.GTA_roles.Add(new Role() { command = f.command, name = f.name, nbr = f.number });
+                GTARoles.Add(new Role() { command = f.command, name = f.name, nbr = f.number });
             }
         }
 
@@ -91,6 +92,12 @@ namespace StreamHub
             if (c_GTA_modeLIFO.Checked) SHubConfiguration.GTA_mode = c_GTA_modeLIFO.Name;
             if (c_GTA_modeRR.Checked) SHubConfiguration.GTA_mode = c_GTA_modeRR.Name;
             if (c_GTA_mode_Rfull.Checked) SHubConfiguration.GTA_mode = c_GTA_mode_Rfull.Name;
+        }
+
+        private void c_RemoveRole_Click(object sender, EventArgs e)
+        {
+            Role r = (Role)c_roles.SelectedRows[0].DataBoundItem;
+            GTARoles.Remove(r);
         }
     }
 }
