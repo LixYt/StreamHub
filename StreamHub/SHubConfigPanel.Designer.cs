@@ -62,6 +62,7 @@ namespace StreamHub
             this.c_BotName = new System.Windows.Forms.TextBox();
             this.label9 = new System.Windows.Forms.Label();
             this.GetToken = new System.Windows.Forms.LinkLabel();
+            this.c_botVerif = new System.Windows.Forms.LinkLabel();
             this.groupBox3.SuspendLayout();
             this.groupBox4.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.c_roles)).BeginInit();
@@ -404,11 +405,23 @@ namespace StreamHub
             this.GetToken.Text = "Get Twitch Token";
             this.GetToken.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.GetToken_LinkClicked);
             // 
+            // c_botVerif
+            // 
+            this.c_botVerif.AutoSize = true;
+            this.c_botVerif.Location = new System.Drawing.Point(316, 152);
+            this.c_botVerif.Name = "c_botVerif";
+            this.c_botVerif.Size = new System.Drawing.Size(168, 15);
+            this.c_botVerif.TabIndex = 18;
+            this.c_botVerif.TabStop = true;
+            this.c_botVerif.Text = "Request twitch bot verification";
+            this.c_botVerif.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.c_botVerif_LinkClicked);
+            // 
             // SHubConfigPanel
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(644, 616);
+            this.Controls.Add(this.c_botVerif);
             this.Controls.Add(this.GetToken);
             this.Controls.Add(this.c_BotName);
             this.Controls.Add(this.label9);
@@ -481,5 +494,6 @@ namespace StreamHub
         private System.Windows.Forms.DataGridView c_roles;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.RadioButton c_GTA_mode_Rfull;
+        private System.Windows.Forms.LinkLabel c_botVerif;
     }
 }

@@ -31,7 +31,7 @@ namespace StreamHub
         public List<string> ViewerPoolList { get; set; } = new List<string>();
         public List<GTA_User> GTAPoolList { get; set; } = new List<GTA_User>();
 
-        private BindingList<GTA_User> GTAList /*= new BindingList<GTA_User>()*/;
+        private BindingList<GTA_User> GTAList;
 
         private string SelectedUser = "";
 
@@ -43,15 +43,14 @@ namespace StreamHub
             cfg = cfg ?? new SHubConfig();
             config = cfg;
 
-            if (!config.isSetup())
+            SHubConfigPanel ConfigPannel = new SHubConfigPanel(config);
+            while (!config.isSetup())
             {
-                SHubConfigPanel ConfigPannel = new SHubConfigPanel(config);
-                while (ConfigPannel.ShowDialog() != DialogResult.OK)
-                {
-                    MessageBox.Show("Please configure this tool before using");
-                    ConfigPannel.ShowDialog();
-                }
+                DialogResult r = MessageBox.Show("Setting incomplete. Retry or Quit software ?", "Configuration issue", MessageBoxButtons.RetryCancel);
+                if (r == DialogResult.Retry) { ConfigPannel.ShowDialog(); }
+                else { Load += (s, e) => Close(); break; }
             }
+
 
             Text = $"{config.BotName}";
 
@@ -434,27 +433,53 @@ namespace StreamHub
 
         private void SHubMain_FormClosing(object sender, FormClosingEventArgs e)
         {
-            client.SendMessage(channel, $"{config.BotName}.exe a cessé de fonctionner.");
+            try { client.SendMessage(channel, $"{config.BotName}.exe a cessé de fonctionner."); } catch (Exception) { }    
         }
 
         private void SHubMain_Load(object sender, EventArgs e)
         {
-            GetControlsColors(Controls);
+            GetControlsColors(this);
         }
 
-        private void GetControlsColors(Control.ControlCollection controls)
+        private void GetControlsColors(object o)
         {
-            foreach (Control c in controls)
+            if (o is Form f)
             {
-                Debug.WriteLine($"[CONTROL={c.Name}] {c.ForeColor} | {c.BackColor}");
-                if (c.Controls.Count > 0) GetControlsColors(c.Controls);
+                Debug.WriteLine($"[CONTROL={f.Name}/{o.GetType()}] {f.ForeColor} | {f.BackColor}");
+                if (f.Controls.Count > 0) GetControlsColors(f.Controls);
+            }
+            else if (o is Control c)
+            {
+                if (o is TabControl t) { foreach (TabPage p in t.TabPages) { GetControlsColors(p); } }
+                if (o is TabPage pa) { foreach (Control cl in pa.Controls) { GetControlsColors(cl.Controls); } }
+
+                Debug.WriteLine($"[CONTROL={c.Name}/{o.GetType()}] {c.ForeColor} | {c.BackColor}");
+                foreach (Control cl in c.Controls)
+                {
+                    Debug.WriteLine($"[CONTROL={cl.Name}/{o.GetType()}] {cl.ForeColor} | {cl.BackColor}");
+                    if (c.Controls.Count > 0) GetControlsColors(c.Controls);
+                }
+            }
+            else if (o is ControlCollection cc)
+            {
+                foreach(Control cl in cc) { GetControlsColors(cl); }
             }
         }
 
-        private void SwitchColor(Control.ControlCollection controls)
+        private void SwitchColor(object o)
         {
-            foreach(Control c in controls)
+            if (o is Form f)
             {
+                if (f.Controls.Count > 0) SwitchColor(f.Controls);
+
+                f.ForeColor = (f.ForeColor == SystemColors.ControlText ? Color.White : SystemColors.ControlText);
+                f.BackColor = (f.ForeColor == Color.White ? SystemColors.ControlDark : Color.White);
+            }
+            else if (o is Control c)
+            {
+                if (o is TabControl t) { foreach (TabPage p in t.TabPages) { SwitchColor(p); } }
+                if (o is TabPage pa) { foreach (Control cl in pa.Controls) { SwitchColor(cl.Controls); } }
+
                 switch (c.ForeColor.Name)
                 {
                     case "ControlText":
@@ -472,6 +497,9 @@ namespace StreamHub
                     case "LightCyan":
                         c.ForeColor = SystemColors.WindowText;
                         break;
+                    default:
+                        Debug.WriteLine($"[Darkmode] Forecolor {c.ForeColor.Name} not defined in switch for {c.Name} as {c.GetType()}");
+                        break;
                 }
 
                 switch (c.BackColor.Name)
@@ -483,15 +511,25 @@ namespace StreamHub
                     case "ControlDark":
                         c.BackColor = SystemColors.Control;
                         break;
+                    case "Transparent":
+                        c.BackColor = SystemColors.ControlDark;
+                        break;
+                    default:
+                        Debug.WriteLine($"[Darkmode] BackColor {c.BackColor.Name} not defined in switch for {c.Name} as {c.GetType()}");
+                        break;
                 }
 
-                if (c.Controls.Count > 0) SwitchColor(c.Controls);
+                foreach (Control cl in c.Controls) {  SwitchColor(cl.Controls); }
+            }
+            else if (o is ControlCollection cc)
+            {
+                foreach (Control cl in cc) { SwitchColor(cl); }
             }
         }
 
         private void c_VisualMode_Click(object sender, EventArgs e)
         {
-            SwitchColor(Controls);
+            SwitchColor(this);
         }
     }
 }

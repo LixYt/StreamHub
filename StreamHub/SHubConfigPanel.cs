@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
@@ -71,7 +72,7 @@ namespace StreamHub
 
         private void GetToken_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            System.Diagnostics.Process.Start("https://twitchtokengenerator.com/");
+            System.Diagnostics.Process.Start(new ProcessStartInfo("https://twitchtokengenerator.com/") { UseShellExecute = true });
             MessageBox.Show("Choose 'Custom Scope Token' and keep the information generated in safe place.\r\n" +
                 "Check all Helix scope and uncheck all V5 scope.\r\n" +
                 "Once Gathered, put this information in the software.");
@@ -98,6 +99,11 @@ namespace StreamHub
         {
             Role r = (Role)c_roles.SelectedRows[0].DataBoundItem;
             GTARoles.Remove(r);
+        }
+
+        private void c_botVerif_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            System.Diagnostics.Process.Start(new ProcessStartInfo("https://dev.twitch.tv/limit-increase") { UseShellExecute = true });
         }
     }
 }
