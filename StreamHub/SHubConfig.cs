@@ -58,6 +58,8 @@ namespace StreamHub
         public string command { get { return commandValue; } set { commandValue = value; NotifyPropertyChanged(); } }
         public int nbr { get { return nbrValue; } set { nbrValue = value; NotifyPropertyChanged(); } }
 
+        public string FormatteCommand(string Symbol) { return Symbol + command; }
+
         private string nameValue;
         private string commandValue;
         private int nbrValue;

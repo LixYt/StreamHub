@@ -53,6 +53,8 @@ namespace StreamHub
                 }
             }
 
+            Text = $"{config.BotName}";
+
             try
             {
                 var clientOptions = new ClientOptions
@@ -86,6 +88,7 @@ namespace StreamHub
             c_GTAPool.DataSource = source;
 
             UpdateObsFiles();
+            UpdateGTACount();
         }
 
         private void Client_OnLog(object sender, TwitchLib.Client.Events.OnLogArgs e)
@@ -106,6 +109,8 @@ namespace StreamHub
 
         private void Client_OnMessageReceived(object sender, OnMessageReceivedArgs e)
         {
+            if (!e.ChatMessage.Message.StartsWith(config.CommandSymbol)) return;
+
             /* vvv ViewerPool vvv */
             if (ViewerPool_Status && e.ChatMessage.Message == config.CommandSymbol + config.ViewerPool_RegisterCommand)
             {
@@ -154,21 +159,31 @@ namespace StreamHub
 
             /* vvv Gameveiwer Team Assembler vvv */
 
-            if (config.GTA_roles.Exists(x => x.command == e.ChatMessage.Message.TrimStart(char.Parse(config.CommandSymbol))) 
+            
+            if (config.GTA_roles.Exists(x => x.FormatteCommand(config.CommandSymbol) == e.ChatMessage.Message)
                 && GTA_status && !GTAPoolList.Exists(x => x.userName == e.ChatMessage.Username))
             {
-                Role r = config.GTA_roles.FindLast(x => x.command == e.ChatMessage.Message.TrimStart(char.Parse(config.CommandSymbol)));
+                Role r = config.GTA_roles.FindLast(x => x.FormatteCommand(config.CommandSymbol) == e.ChatMessage.Message);
                 GTA_User u = new GTA_User() { userName = e.ChatMessage.Username, role = r, selected = false};
                 Invoke(new Action(() => GTAList.Add(u)));
                 client.SendMessage(e.ChatMessage.Channel, $"{e.ChatMessage.Username} is registred as {r.name} in Gameviewer queue.");
+
                 UpdateObsFiles();
+                Invoke(new Action(() => UpdateGTACount()));
             }
             if (config.GTA_roles.Exists(x => x.command == e.ChatMessage.Message.TrimStart(char.Parse(config.CommandSymbol)))
                 && GTA_status && GTAPoolList.Exists(x => x.userName == e.ChatMessage.Username))
             {
                 client.SendWhisper(e.ChatMessage.Username, "You are already registred in queue.");
             }
-            
+            if (e.ChatMessage.Message == $"{config.CommandSymbol}untag"
+                && GTA_status && GTAPoolList.Exists(x => x.userName == e.ChatMessage.Username))
+            {
+                Invoke(new Action(() => GTAList.Remove(GTAPoolList.FindLast(x => x.userName == e.ChatMessage.Username)))); 
+                client.SendWhisper(e.ChatMessage.Username, "You are now unregistred from the queue.");
+                Invoke(new Action(() => UpdateGTACount()));
+            }
+
             /* ^^^ Gameveiwer Team Assembler ^^^ */
         }
 
@@ -207,7 +222,10 @@ namespace StreamHub
                 sw.WriteLine(GTAConfig);
             }
         }
-
+        public void UpdateGTACount()
+        {
+            c_nbr.Text = $"{GTAPoolList.Count} viewers queueing";
+        }
         private void Client_OnWhisperReceived(object sender, OnWhisperReceivedArgs e)
         {
             /*if (e.WhisperMessage.Username == "my_friend")
@@ -337,7 +355,7 @@ namespace StreamHub
             int SelectedPlayersCount = GTAPoolList.FindAll(x => x.selected).Count;
             int NotSelectedPlayersCount = GTAPoolList.FindAll(x => !x.selected).Count;
 
-            while (SelectedPlayersCount <= nbPlayers && NotSelectedPlayersCount > 0)
+            while (SelectedPlayersCount < nbPlayers && NotSelectedPlayersCount > 0)
             {
                 int i = rand.Next(0, GTAPoolList.FindAll(x => !x.selected).Count-1);
                 GTAPoolList.FindAll(x => !x.selected)[i].selected = true;
@@ -356,7 +374,7 @@ namespace StreamHub
                 int SelectedPlayersCount = GTAPoolList.FindAll(x => x.selected && x.role.name == role.name).Count;
                 int NotSelectedPlayersCount = GTAPoolList.FindAll(x => !x.selected && x.role.name == role.name).Count;
 
-                while (SelectedPlayersCount <= role.nbr && NotSelectedPlayersCount > 0)
+                while (SelectedPlayersCount < role.nbr && NotSelectedPlayersCount > 0)
                 {
                     int i = rand.Next(0, NotSelectedPlayersCount - 1);
                     GTAPoolList.FindAll(x => !x.selected && x.role.name == role.name)[i].selected = true;
@@ -374,7 +392,7 @@ namespace StreamHub
                 int SelectedPlayersCount = GTAPoolList.FindAll(x => x.selected && x.role.name == role.name).Count;
                 int NotSelectedPlayersCount = GTAPoolList.FindAll(x => !x.selected && x.role.name == role.name).Count;
 
-                while (SelectedPlayersCount <= role.nbr && NotSelectedPlayersCount > 0)
+                while (SelectedPlayersCount < role.nbr && NotSelectedPlayersCount > 0)
                 {
                     GTAPoolList.FindAll(x => !x.selected && x.role.name == role.name)[0].selected = true;
 
@@ -391,7 +409,7 @@ namespace StreamHub
                 int SelectedPlayersCount = GTAPoolList.FindAll(x => x.selected && x.role.name == role.name).Count;
                 int NotSelectedPlayersCount = GTAPoolList.FindAll(x => !x.selected && x.role.name == role.name).Count;
 
-                while (SelectedPlayersCount <= role.nbr && NotSelectedPlayersCount > 0)
+                while (SelectedPlayersCount < role.nbr && NotSelectedPlayersCount > 0)
                 {
                     int i = GTAPoolList.FindAll(x => !x.selected && x.role.name == role.name).Count;
                     GTAPoolList.FindAll(x => !x.selected && x.role.name == role.name)[i - 1].selected = true;
@@ -412,6 +430,68 @@ namespace StreamHub
         {
             if (GTA_status) return;
             GTAList.Clear();
+        }
+
+        private void SHubMain_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            client.SendMessage(channel, $"{config.BotName}.exe a cessé de fonctionner.");
+        }
+
+        private void SHubMain_Load(object sender, EventArgs e)
+        {
+            GetControlsColors(Controls);
+        }
+
+        private void GetControlsColors(Control.ControlCollection controls)
+        {
+            foreach (Control c in controls)
+            {
+                Debug.WriteLine($"[CONTROL={c.Name}] {c.ForeColor} | {c.BackColor}");
+                if (c.Controls.Count > 0) GetControlsColors(c.Controls);
+            }
+        }
+
+        private void SwitchColor(Control.ControlCollection controls)
+        {
+            foreach(Control c in controls)
+            {
+                switch (c.ForeColor.Name)
+                {
+                    case "ControlText":
+                        c.ForeColor = Color.White;
+                        break;
+
+                    case "White":
+                        c.ForeColor = SystemColors.ControlText;
+                        break;
+
+                    case "WindowText":
+                        c.ForeColor = Color.LightCyan;
+                        break;
+
+                    case "LightCyan":
+                        c.ForeColor = SystemColors.WindowText;
+                        break;
+                }
+
+                switch (c.BackColor.Name)
+                {
+                    case "Control":
+                        c.BackColor = SystemColors.ControlDark;
+                        break;
+
+                    case "ControlDark":
+                        c.BackColor = SystemColors.Control;
+                        break;
+                }
+
+                if (c.Controls.Count > 0) SwitchColor(c.Controls);
+            }
+        }
+
+        private void c_VisualMode_Click(object sender, EventArgs e)
+        {
+            SwitchColor(Controls);
         }
     }
 }

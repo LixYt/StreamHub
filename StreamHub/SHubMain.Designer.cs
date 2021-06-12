@@ -30,27 +30,31 @@ namespace StreamHub
         private void InitializeComponent()
         {
             this.C_ConfigForm = new System.Windows.Forms.Button();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.c_ViewerPool_Reset = new System.Windows.Forms.Button();
             this.c_ViewerPool_Pick = new System.Windows.Forms.Button();
             this.c_ViewerPool = new System.Windows.Forms.ListBox();
             this.c_viewerpool_startstop = new System.Windows.Forms.Button();
             this.button4 = new System.Windows.Forms.Button();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.c_ResetSelection = new System.Windows.Forms.Button();
             this.c_GTAPool = new System.Windows.Forms.DataGridView();
             this.c_GTA_Auto = new System.Windows.Forms.Button();
             this.c_GTA_Reset = new System.Windows.Forms.Button();
             this.c_GTA_startstop = new System.Windows.Forms.Button();
-            this.c_ResetSelection = new System.Windows.Forms.Button();
-            this.groupBox1.SuspendLayout();
-            this.groupBox2.SuspendLayout();
+            this.c_features = new System.Windows.Forms.TabControl();
+            this.tab_ViewerPool = new System.Windows.Forms.TabPage();
+            this.tab_GTA = new System.Windows.Forms.TabPage();
+            this.c_nbr = new System.Windows.Forms.Label();
+            this.c_VisualMode = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.c_GTAPool)).BeginInit();
+            this.c_features.SuspendLayout();
+            this.tab_ViewerPool.SuspendLayout();
+            this.tab_GTA.SuspendLayout();
             this.SuspendLayout();
             // 
             // C_ConfigForm
             // 
             this.C_ConfigForm.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.C_ConfigForm.Location = new System.Drawing.Point(794, 12);
+            this.C_ConfigForm.Location = new System.Drawing.Point(545, 5);
             this.C_ConfigForm.Name = "C_ConfigForm";
             this.C_ConfigForm.Size = new System.Drawing.Size(75, 23);
             this.C_ConfigForm.TabIndex = 0;
@@ -58,22 +62,9 @@ namespace StreamHub
             this.C_ConfigForm.UseVisualStyleBackColor = true;
             this.C_ConfigForm.Click += new System.EventHandler(this.C_ConfigForm_Click);
             // 
-            // groupBox1
-            // 
-            this.groupBox1.Controls.Add(this.c_ViewerPool_Reset);
-            this.groupBox1.Controls.Add(this.c_ViewerPool_Pick);
-            this.groupBox1.Controls.Add(this.c_ViewerPool);
-            this.groupBox1.Controls.Add(this.c_viewerpool_startstop);
-            this.groupBox1.Location = new System.Drawing.Point(12, 12);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(228, 426);
-            this.groupBox1.TabIndex = 5;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Pick a viewer from a  pool (ViewerPool)";
-            // 
             // c_ViewerPool_Reset
             // 
-            this.c_ViewerPool_Reset.Location = new System.Drawing.Point(115, 51);
+            this.c_ViewerPool_Reset.Location = new System.Drawing.Point(345, 13);
             this.c_ViewerPool_Reset.Name = "c_ViewerPool_Reset";
             this.c_ViewerPool_Reset.Size = new System.Drawing.Size(107, 23);
             this.c_ViewerPool_Reset.TabIndex = 9;
@@ -83,7 +74,7 @@ namespace StreamHub
             // 
             // c_ViewerPool_Pick
             // 
-            this.c_ViewerPool_Pick.Location = new System.Drawing.Point(6, 51);
+            this.c_ViewerPool_Pick.Location = new System.Drawing.Point(236, 13);
             this.c_ViewerPool_Pick.Name = "c_ViewerPool_Pick";
             this.c_ViewerPool_Pick.Size = new System.Drawing.Size(103, 23);
             this.c_ViewerPool_Pick.TabIndex = 8;
@@ -93,17 +84,21 @@ namespace StreamHub
             // 
             // c_ViewerPool
             // 
+            this.c_ViewerPool.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.c_ViewerPool.BackColor = System.Drawing.SystemColors.Control;
             this.c_ViewerPool.FormattingEnabled = true;
             this.c_ViewerPool.ItemHeight = 15;
-            this.c_ViewerPool.Location = new System.Drawing.Point(6, 80);
+            this.c_ViewerPool.Location = new System.Drawing.Point(3, 51);
             this.c_ViewerPool.Name = "c_ViewerPool";
-            this.c_ViewerPool.Size = new System.Drawing.Size(216, 334);
+            this.c_ViewerPool.Size = new System.Drawing.Size(614, 364);
             this.c_ViewerPool.TabIndex = 7;
             // 
             // c_viewerpool_startstop
             // 
             this.c_viewerpool_startstop.ForeColor = System.Drawing.Color.Red;
-            this.c_viewerpool_startstop.Location = new System.Drawing.Point(6, 22);
+            this.c_viewerpool_startstop.Location = new System.Drawing.Point(14, 13);
             this.c_viewerpool_startstop.Name = "c_viewerpool_startstop";
             this.c_viewerpool_startstop.Size = new System.Drawing.Size(216, 23);
             this.c_viewerpool_startstop.TabIndex = 5;
@@ -120,34 +115,33 @@ namespace StreamHub
             this.button4.Text = "Start pool";
             this.button4.UseVisualStyleBackColor = true;
             // 
-            // groupBox2
+            // c_ResetSelection
             // 
-            this.groupBox2.Controls.Add(this.c_ResetSelection);
-            this.groupBox2.Controls.Add(this.c_GTAPool);
-            this.groupBox2.Controls.Add(this.c_GTA_Auto);
-            this.groupBox2.Controls.Add(this.c_GTA_Reset);
-            this.groupBox2.Controls.Add(this.c_GTA_startstop);
-            this.groupBox2.Location = new System.Drawing.Point(246, 12);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(244, 426);
-            this.groupBox2.TabIndex = 6;
-            this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "GameViewer Team Assembler";
+            this.c_ResetSelection.Location = new System.Drawing.Point(484, 8);
+            this.c_ResetSelection.Name = "c_ResetSelection";
+            this.c_ResetSelection.Size = new System.Drawing.Size(97, 23);
+            this.c_ResetSelection.TabIndex = 11;
+            this.c_ResetSelection.Text = "Reset Selection";
+            this.c_ResetSelection.UseVisualStyleBackColor = true;
+            this.c_ResetSelection.Click += new System.EventHandler(this.c_ResetSelection_Click);
             // 
             // c_GTAPool
             // 
             this.c_GTAPool.AllowUserToAddRows = false;
             this.c_GTAPool.AllowUserToOrderColumns = true;
+            this.c_GTAPool.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.c_GTAPool.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.c_GTAPool.Location = new System.Drawing.Point(6, 80);
+            this.c_GTAPool.Location = new System.Drawing.Point(3, 37);
             this.c_GTAPool.Name = "c_GTAPool";
             this.c_GTAPool.RowTemplate.Height = 25;
-            this.c_GTAPool.Size = new System.Drawing.Size(225, 334);
+            this.c_GTAPool.Size = new System.Drawing.Size(614, 378);
             this.c_GTAPool.TabIndex = 12;
             // 
             // c_GTA_Auto
             // 
-            this.c_GTA_Auto.Location = new System.Drawing.Point(6, 51);
+            this.c_GTA_Auto.Location = new System.Drawing.Point(291, 8);
             this.c_GTA_Auto.Name = "c_GTA_Auto";
             this.c_GTA_Auto.Size = new System.Drawing.Size(122, 23);
             this.c_GTA_Auto.TabIndex = 11;
@@ -157,7 +151,7 @@ namespace StreamHub
             // 
             // c_GTA_Reset
             // 
-            this.c_GTA_Reset.Location = new System.Drawing.Point(172, 22);
+            this.c_GTA_Reset.Location = new System.Drawing.Point(419, 8);
             this.c_GTA_Reset.Name = "c_GTA_Reset";
             this.c_GTA_Reset.Size = new System.Drawing.Size(59, 23);
             this.c_GTA_Reset.TabIndex = 10;
@@ -168,7 +162,7 @@ namespace StreamHub
             // c_GTA_startstop
             // 
             this.c_GTA_startstop.ForeColor = System.Drawing.Color.Red;
-            this.c_GTA_startstop.Location = new System.Drawing.Point(6, 22);
+            this.c_GTA_startstop.Location = new System.Drawing.Point(8, 8);
             this.c_GTA_startstop.Name = "c_GTA_startstop";
             this.c_GTA_startstop.Size = new System.Drawing.Size(160, 23);
             this.c_GTA_startstop.TabIndex = 7;
@@ -176,29 +170,87 @@ namespace StreamHub
             this.c_GTA_startstop.UseVisualStyleBackColor = true;
             this.c_GTA_startstop.Click += new System.EventHandler(this.c_GTA_startstop_Click);
             // 
-            // c_ResetSelection
+            // c_features
             // 
-            this.c_ResetSelection.Location = new System.Drawing.Point(134, 51);
-            this.c_ResetSelection.Name = "c_ResetSelection";
-            this.c_ResetSelection.Size = new System.Drawing.Size(97, 23);
-            this.c_ResetSelection.TabIndex = 11;
-            this.c_ResetSelection.Text = "Reset Selection";
-            this.c_ResetSelection.UseVisualStyleBackColor = true;
-            this.c_ResetSelection.Click += new System.EventHandler(this.c_ResetSelection_Click);
+            this.c_features.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.c_features.Controls.Add(this.tab_ViewerPool);
+            this.c_features.Controls.Add(this.tab_GTA);
+            this.c_features.Location = new System.Drawing.Point(0, 12);
+            this.c_features.Name = "c_features";
+            this.c_features.SelectedIndex = 0;
+            this.c_features.Size = new System.Drawing.Size(628, 446);
+            this.c_features.TabIndex = 7;
+            // 
+            // tab_ViewerPool
+            // 
+            this.tab_ViewerPool.Controls.Add(this.c_ViewerPool);
+            this.tab_ViewerPool.Controls.Add(this.c_ViewerPool_Reset);
+            this.tab_ViewerPool.Controls.Add(this.c_viewerpool_startstop);
+            this.tab_ViewerPool.Controls.Add(this.c_ViewerPool_Pick);
+            this.tab_ViewerPool.Location = new System.Drawing.Point(4, 24);
+            this.tab_ViewerPool.Name = "tab_ViewerPool";
+            this.tab_ViewerPool.Padding = new System.Windows.Forms.Padding(3);
+            this.tab_ViewerPool.Size = new System.Drawing.Size(620, 418);
+            this.tab_ViewerPool.TabIndex = 0;
+            this.tab_ViewerPool.Text = "ViewerPool";
+            this.tab_ViewerPool.UseVisualStyleBackColor = true;
+            // 
+            // tab_GTA
+            // 
+            this.tab_GTA.Controls.Add(this.c_nbr);
+            this.tab_GTA.Controls.Add(this.c_GTAPool);
+            this.tab_GTA.Controls.Add(this.c_ResetSelection);
+            this.tab_GTA.Controls.Add(this.c_GTA_startstop);
+            this.tab_GTA.Controls.Add(this.c_GTA_Reset);
+            this.tab_GTA.Controls.Add(this.c_GTA_Auto);
+            this.tab_GTA.Location = new System.Drawing.Point(4, 24);
+            this.tab_GTA.Name = "tab_GTA";
+            this.tab_GTA.Padding = new System.Windows.Forms.Padding(3);
+            this.tab_GTA.Size = new System.Drawing.Size(620, 418);
+            this.tab_GTA.TabIndex = 1;
+            this.tab_GTA.Text = "Gameviewer Team Assembler";
+            this.tab_GTA.UseVisualStyleBackColor = true;
+            // 
+            // c_nbr
+            // 
+            this.c_nbr.AutoSize = true;
+            this.c_nbr.Location = new System.Drawing.Point(175, 13);
+            this.c_nbr.Name = "c_nbr";
+            this.c_nbr.Size = new System.Drawing.Size(104, 15);
+            this.c_nbr.TabIndex = 13;
+            this.c_nbr.Text = "x viewers in queue";
+            // 
+            // c_VisualMode
+            // 
+            this.c_VisualMode.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.c_VisualMode.Location = new System.Drawing.Point(426, 5);
+            this.c_VisualMode.Name = "c_VisualMode";
+            this.c_VisualMode.Size = new System.Drawing.Size(113, 23);
+            this.c_VisualMode.TabIndex = 8;
+            this.c_VisualMode.Text = "Light/DarkMode";
+            this.c_VisualMode.UseVisualStyleBackColor = true;
+            this.c_VisualMode.Click += new System.EventHandler(this.c_VisualMode_Click);
             // 
             // SHubMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(881, 458);
-            this.Controls.Add(this.groupBox2);
-            this.Controls.Add(this.groupBox1);
+            this.ClientSize = new System.Drawing.Size(628, 458);
+            this.Controls.Add(this.c_VisualMode);
             this.Controls.Add(this.C_ConfigForm);
+            this.Controls.Add(this.c_features);
+            this.MinimumSize = new System.Drawing.Size(644, 497);
             this.Name = "SHubMain";
             this.Text = "SHubMain";
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox2.ResumeLayout(false);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.SHubMain_FormClosing);
+            this.Load += new System.EventHandler(this.SHubMain_Load);
             ((System.ComponentModel.ISupportInitialize)(this.c_GTAPool)).EndInit();
+            this.c_features.ResumeLayout(false);
+            this.tab_ViewerPool.ResumeLayout(false);
+            this.tab_GTA.ResumeLayout(false);
+            this.tab_GTA.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -206,13 +258,11 @@ namespace StreamHub
         #endregion
 
         private System.Windows.Forms.Button C_ConfigForm;
-        private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.Button c_ViewerPool_Pick;
         private System.Windows.Forms.ListBox c_ViewerPool;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button c_ViewerPool_Reset;
         private System.Windows.Forms.Button button4;
-        private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.Button c_GTA_;
         private System.Windows.Forms.Button c_GTA_Reset;
         private System.Windows.Forms.Button c_GTA_Auto;
@@ -220,5 +270,10 @@ namespace StreamHub
         private System.Windows.Forms.Button c_GTA_startstop;
         private System.Windows.Forms.DataGridView c_GTAPool;
         private System.Windows.Forms.Button c_ResetSelection;
+        private System.Windows.Forms.TabControl c_features;
+        private System.Windows.Forms.TabPage tab_ViewerPool;
+        private System.Windows.Forms.TabPage tab_GTA;
+        private System.Windows.Forms.Label c_nbr;
+        private System.Windows.Forms.Button c_VisualMode;
     }
 }
