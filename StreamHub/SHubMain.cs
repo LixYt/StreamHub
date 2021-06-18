@@ -16,6 +16,15 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using System.IO;
+using System.Runtime.InteropServices;
+using GameOverlay.Drawing;
+using GameOverlay.Windows;
+using Color = System.Drawing.Color;
+using Graphics = GameOverlay.Drawing.Graphics;
+using SolidBrush = GameOverlay.Drawing.SolidBrush;
+using Font = GameOverlay.Drawing.Font;
+using Image = GameOverlay.Drawing.Image;
+using Rectangle = GameOverlay.Drawing.Rectangle;
 
 namespace StreamHub
 {
@@ -32,8 +41,17 @@ namespace StreamHub
         public List<GTA_User> GTAPoolList { get; set; } = new List<GTA_User>();
 
         private BindingList<GTA_User> GTAList;
-
         private string SelectedUser = "";
+
+        private readonly GraphicsWindow _window;
+        private readonly Dictionary<string, SolidBrush> _brushes;
+        private readonly Dictionary<string, Font> _fonts;
+        private readonly Dictionary<string, Image> _images;
+
+        private Geometry _gridGeometry;
+        private Rectangle _gridBounds;
+
+        private List<string> LastLines = new List<string>();
 
         public SHubMain(SHubConfig cfg)
         {
@@ -79,7 +97,6 @@ namespace StreamHub
                 Debug.WriteLine(e);
             }
 
-            //GTAList = GTAList ?? new List<GTA_User>();
             c_GTAPool.AutoGenerateColumns = true;
 
             GTAList = new BindingList<GTA_User>(GTAPoolList);
@@ -88,27 +105,108 @@ namespace StreamHub
 
             UpdateObsFiles();
             UpdateGTACount();
+
+            _brushes = new Dictionary<string, SolidBrush>();
+            _fonts = new Dictionary<string, Font>();
+            _images = new Dictionary<string, Image>();
+
+            var gfx = new Graphics()
+            {
+                MeasureFPS = true,
+                PerPrimitiveAntiAliasing = true,
+                TextAntiAliasing = true
+            };
+
+            _window = new GraphicsWindow(0, 1080-600, 800, 600, gfx)
+            {
+                FPS = 60,
+                IsTopmost = true,
+                IsVisible = true
+            };
+
+            _window.DestroyGraphics += _window_DestroyGraphics;
+            _window.DrawGraphics += _window_DrawGraphics;
+            _window.SetupGraphics += _window_SetupGraphics;
+
+            _window.Create();
+            //_window.Join(); //seems to replace or take over the WinForm
+        }
+
+
+        private void _window_DestroyGraphics(object sender, DestroyGraphicsEventArgs e)
+        {
+            foreach (var pair in _brushes) pair.Value.Dispose();
+            foreach (var pair in _fonts) pair.Value.Dispose();
+            foreach (var pair in _images) pair.Value.Dispose();
+        }
+        private void _window_SetupGraphics(object sender, SetupGraphicsEventArgs e)
+        {
+            var gfx = e.Graphics;
+
+            if (e.RecreateResources)
+            {
+                foreach (var pair in _brushes) pair.Value.Dispose();
+                foreach (var pair in _images) pair.Value.Dispose();
+            }
+
+            _brushes["black"] = gfx.CreateSolidBrush(0, 0, 0);
+            _brushes["white"] = gfx.CreateSolidBrush(255, 255, 255);
+            _brushes["red"] = gfx.CreateSolidBrush(255, 0, 0);
+            _brushes["green"] = gfx.CreateSolidBrush(0, 255, 0);
+            _brushes["blue"] = gfx.CreateSolidBrush(0, 0, 255);
+            _brushes["lightBlue"] = gfx.CreateSolidBrush(0, 255, 255);
+            _brushes["background"] = gfx.CreateSolidBrush(0,0,0,0);
+            _brushes["grid"] = gfx.CreateSolidBrush(255, 255, 255, 0.2f);
+            _brushes["random"] = gfx.CreateSolidBrush(0, 0, 0);
+
+            if (e.RecreateResources) return;
+
+            _fonts["arial"] = gfx.CreateFont("Arial", 12);
+            _fonts["consolas"] = gfx.CreateFont("Consolas", 14);
+
+            _gridBounds = new Rectangle(20, 60, gfx.Width - 20, gfx.Height - 20);
+            _gridGeometry = gfx.CreateGeometry();
+
+            _gridGeometry.Close();
+        }
+        private void _window_DrawGraphics(object sender, DrawGraphicsEventArgs e)
+        {
+            Graphics gfx = e.Graphics;
+
+            var infoText = new StringBuilder().ToString();
+            foreach(string s in LastLines)
+            {
+                infoText = new StringBuilder().Append(infoText).Append($"{s}\r\n").ToString();
+            }
+
+            gfx.ClearScene(_brushes["background"]);
+            gfx.DrawTextWithBackground(_fonts["consolas"], _brushes["lightBlue"], gfx.CreateSolidBrush(0, 0, 0, 128), 58, 20, infoText);
+            gfx.DrawGeometry(_gridGeometry, _brushes["grid"], 1.0f);
+            
         }
 
         private void Client_OnLog(object sender, TwitchLib.Client.Events.OnLogArgs e)
         {
             Console.WriteLine($"{e.DateTime.ToString()}: {e.BotUsername} - {e.Data}");
         }
-
         private void Client_OnConnected(object sender, OnConnectedArgs e)
         {
             Console.WriteLine($"Connected to {e.AutoJoinChannel}");
         }
-
         private void Client_OnJoinedChannel(object sender, OnJoinedChannelArgs e)
         {
             client.SendMessage(e.Channel, $"/me prêt à l'action et en attente d'instruction...");
             channel = e.Channel;
         }
-
         private void Client_OnMessageReceived(object sender, OnMessageReceivedArgs e)
         {
-            if (!e.ChatMessage.Message.StartsWith(config.CommandSymbol)) return;
+            if (!e.ChatMessage.Message.StartsWith(config.CommandSymbol))
+            {
+                LastLines.Add($"{e.ChatMessage.Username} : {e.ChatMessage.Message}");
+                if (LastLines.Count > 15) LastLines.RemoveAt(0);
+
+                return;
+            }
 
             /* vvv ViewerPool vvv */
             if (ViewerPool_Status && e.ChatMessage.Message == config.CommandSymbol + config.ViewerPool_RegisterCommand)
@@ -230,7 +328,6 @@ namespace StreamHub
             /*if (e.WhisperMessage.Username == "my_friend")
                 client.SendWhisper(e.WhisperMessage.Username, "Hey! Whispers are so cool!!");*/
         }
-
         private void Client_OnNewSubscriber(object sender, OnNewSubscriberArgs e)
         {
             /*if (e.Subscriber.SubscriptionPlan == SubscriptionPlan.Prime)
@@ -239,7 +336,6 @@ namespace StreamHub
                 client.SendMessage(e.Channel, $"Welcome {e.Subscriber.DisplayName} to the substers! You just earned 500 points!");
             */
         }
-
         private void C_ConfigForm_Click(object sender, EventArgs e)
         {
             SHubConfigPanel ConfigPannel = new SHubConfigPanel(config);
@@ -252,7 +348,6 @@ namespace StreamHub
             }
             
         }
-
         private void c_viewerpool_startstop_Click(object sender, EventArgs e)
         {
             if (ViewerPool_Status)
@@ -268,7 +363,6 @@ namespace StreamHub
                 client.SendMessage(channel, "ViewerPool Started");
             }
         }
-
         private void c_ViewerPool_Reset_Click(object sender, EventArgs e)
         {
             if (!ViewerPool_Status)
@@ -279,7 +373,6 @@ namespace StreamHub
                 UpdateObsFiles();
             }
         }
-
         private void c_ViewerPool_Pick_Click(object sender, EventArgs e)
         {
             if (c_ViewerPool.Items.Count == 0) return;
@@ -293,7 +386,6 @@ namespace StreamHub
             client.SendMessage(channel, msg);
             client.SendWhisper(c_ViewerPool.Items[selected].ToString(), msg);
         }
-
         private void c_GTA_startstop_Click(object sender, EventArgs e)
         {
             if (GTA_status)
@@ -309,7 +401,6 @@ namespace StreamHub
                 client.SendMessage(channel, "Gameviewer queue Started");
             }
         }
-
         private void c_GTA_Auto_Click(object sender, EventArgs e)
         {
             if (GTA_status) return;
@@ -363,7 +454,6 @@ namespace StreamHub
                 NotSelectedPlayersCount = GTAPoolList.FindAll(x => !x.selected).Count;
             }
         }
-
         private void GTA_RandomByRole()
         {
             Random rand = new Random();
@@ -383,7 +473,6 @@ namespace StreamHub
                 }
             }
         }
-
         private void GTA_FIFO()
         {
             foreach (Role role in config.GTA_roles)
@@ -400,7 +489,6 @@ namespace StreamHub
                 }
             }
         }
-
         private void GTA_LIFO()
         {
             foreach (Role role in config.GTA_roles)
@@ -424,23 +512,19 @@ namespace StreamHub
             if (GTA_status) return;
             GTAPoolList.ForEach(x => x.selected = false);
         }
-
         private void c_GTA_Reset_Click(object sender, EventArgs e)
         {
             if (GTA_status) return;
             GTAList.Clear();
         }
-
         private void SHubMain_FormClosing(object sender, FormClosingEventArgs e)
         {
             try { client.SendMessage(channel, $"{config.BotName}.exe a cessé de fonctionner."); } catch (Exception) { }    
         }
-
         private void SHubMain_Load(object sender, EventArgs e)
         {
             GetControlsColors(this);
         }
-
         private void GetControlsColors(object o)
         {
             if (o is Form f)
@@ -465,7 +549,6 @@ namespace StreamHub
                 foreach(Control cl in cc) { GetControlsColors(cl); }
             }
         }
-
         private void SwitchColor(object o)
         {
             if (o is Form f)
@@ -526,10 +609,15 @@ namespace StreamHub
                 foreach (Control cl in cc) { SwitchColor(cl); }
             }
         }
-
         private void c_VisualMode_Click(object sender, EventArgs e)
         {
             SwitchColor(this);
+        }
+
+        private void c_Overlay_Click(object sender, EventArgs e)
+        {
+            if (!_window.IsPaused) { _window.Hide(); _window.Pause(); }
+            else { _window.Unpause(); _window.Show(); }
         }
     }
 }

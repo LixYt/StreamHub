@@ -45,6 +45,7 @@ namespace StreamHub
             this.tab_GTA = new System.Windows.Forms.TabPage();
             this.c_nbr = new System.Windows.Forms.Label();
             this.c_VisualMode = new System.Windows.Forms.Button();
+            this.c_Overlay = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.c_GTAPool)).BeginInit();
             this.c_features.SuspendLayout();
             this.tab_ViewerPool.SuspendLayout();
@@ -233,11 +234,23 @@ namespace StreamHub
             this.c_VisualMode.UseVisualStyleBackColor = true;
             this.c_VisualMode.Click += new System.EventHandler(this.c_VisualMode_Click);
             // 
+            // c_Overlay
+            // 
+            this.c_Overlay.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.c_Overlay.Location = new System.Drawing.Point(307, 5);
+            this.c_Overlay.Name = "c_Overlay";
+            this.c_Overlay.Size = new System.Drawing.Size(113, 23);
+            this.c_Overlay.TabIndex = 9;
+            this.c_Overlay.Text = "Overlay on/off";
+            this.c_Overlay.UseVisualStyleBackColor = true;
+            this.c_Overlay.Click += new System.EventHandler(this.c_Overlay_Click);
+            // 
             // SHubMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(628, 458);
+            this.Controls.Add(this.c_Overlay);
             this.Controls.Add(this.c_VisualMode);
             this.Controls.Add(this.C_ConfigForm);
             this.Controls.Add(this.c_features);
@@ -275,5 +288,6 @@ namespace StreamHub
         private System.Windows.Forms.TabPage tab_GTA;
         private System.Windows.Forms.Label c_nbr;
         private System.Windows.Forms.Button c_VisualMode;
+        private System.Windows.Forms.Button c_Overlay;
     }
 }
