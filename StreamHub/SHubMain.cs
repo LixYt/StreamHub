@@ -13,10 +13,8 @@ using TwitchLib.Client.Enums;
 using TwitchLib.Communication.Models;
 using TwitchLib.Communication.Clients;
 using System.Diagnostics;
-using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using System.IO;
-using System.Runtime.InteropServices;
 using GameOverlay.Drawing;
 using GameOverlay.Windows;
 using Color = System.Drawing.Color;
@@ -25,6 +23,9 @@ using SolidBrush = GameOverlay.Drawing.SolidBrush;
 using Font = GameOverlay.Drawing.Font;
 using Image = GameOverlay.Drawing.Image;
 using Rectangle = GameOverlay.Drawing.Rectangle;
+using Discord;
+using Discord.WebSocket;
+using System.Threading.Tasks;
 
 namespace StreamHub
 {
@@ -53,10 +54,13 @@ namespace StreamHub
 
         private List<string> LastLines = new List<string>();
 
+        private readonly DiscordSocketClient _client;
+
         public SHubMain(SHubConfig cfg)
         {
             InitializeComponent();
 
+            #region Twitch
             client = new TwitchClient();
             cfg = cfg ?? new SHubConfig();
             config = cfg;
@@ -96,7 +100,9 @@ namespace StreamHub
             {
                 Debug.WriteLine(e);
             }
+            #endregion
 
+            #region Twitch_Features
             c_GTAPool.AutoGenerateColumns = true;
 
             GTAList = new BindingList<GTA_User>(GTAPoolList);
@@ -105,7 +111,9 @@ namespace StreamHub
 
             UpdateObsFiles();
             UpdateGTACount();
+            #endregion
 
+            #region Overlay
             _brushes = new Dictionary<string, SolidBrush>();
             _fonts = new Dictionary<string, Font>();
             _images = new Dictionary<string, Image>();
@@ -130,9 +138,56 @@ namespace StreamHub
 
             _window.Create();
             //_window.Join(); //seems to replace or take over the WinForm
+            #endregion
+
+            #region Discord
+            _client = new DiscordSocketClient();
+
+            _client.Log += LogAsync;
+            _client.Ready += ReadyAsync;
+            _client.MessageReceived += MessageReceivedAsync;
+
+            _ = DiscordTask();
+            #endregion
         }
 
 
+        #region Discord Events
+        private Task LogAsync(LogMessage log)
+        {
+            Console.WriteLine(log.ToString());
+            return Task.CompletedTask;
+        }
+        private Task ReadyAsync()
+        {
+            Console.WriteLine($"{_client.CurrentUser} is connected!");
+
+            return Task.CompletedTask;
+        }
+        private async Task MessageReceivedAsync(SocketMessage message)
+        {
+            // The bot should never respond to itself.
+            if (message.Author.Id == _client.CurrentUser.Id)
+                return;
+
+            if (message.Content == "!ping")
+                await message.Channel.SendMessageAsync("pong!");
+        }
+        #region
+
+        #region Disocrd Actions
+        private async Task DiscordTask()
+        {
+            await _client.LoginAsync(TokenType.Bot, DiscordConfig.Token);
+            await _client.StartAsync();
+            //need to add an URL to join the bot to the discord server
+            //https://discord.com/api/oauth2/authorize?client_id=157730590492196864&scope=bot&permissions=1
+            //need a URL link to create a bot account + document it
+            //https://discord.com/developers/applications#top
+        }
+        #endregion
+
+        #region Overlay events
         private void _window_DestroyGraphics(object sender, DestroyGraphicsEventArgs e)
         {
             foreach (var pair in _brushes) pair.Value.Dispose();
@@ -155,7 +210,7 @@ namespace StreamHub
             _brushes["green"] = gfx.CreateSolidBrush(0, 255, 0);
             _brushes["blue"] = gfx.CreateSolidBrush(0, 0, 255);
             _brushes["lightBlue"] = gfx.CreateSolidBrush(0, 255, 255);
-            _brushes["background"] = gfx.CreateSolidBrush(0,0,0,0);
+            _brushes["background"] = gfx.CreateSolidBrush(0, 0, 0, 0);
             _brushes["grid"] = gfx.CreateSolidBrush(255, 255, 255, 0.2f);
             _brushes["random"] = gfx.CreateSolidBrush(0, 0, 0);
 
@@ -174,7 +229,7 @@ namespace StreamHub
             Graphics gfx = e.Graphics;
 
             var infoText = new StringBuilder().ToString();
-            foreach(string s in LastLines)
+            foreach (string s in LastLines)
             {
                 infoText = new StringBuilder().Append(infoText).Append($"{s}\r\n").ToString();
             }
@@ -182,9 +237,11 @@ namespace StreamHub
             gfx.ClearScene(_brushes["background"]);
             gfx.DrawTextWithBackground(_fonts["consolas"], _brushes["lightBlue"], gfx.CreateSolidBrush(0, 0, 0, 128), 58, 20, infoText);
             gfx.DrawGeometry(_gridGeometry, _brushes["grid"], 1.0f);
-            
-        }
 
+        }
+        #endregion
+
+        #region Twitch Events
         private void Client_OnLog(object sender, TwitchLib.Client.Events.OnLogArgs e)
         {
             Console.WriteLine($"{e.DateTime.ToString()}: {e.BotUsername} - {e.Data}");
@@ -283,7 +340,22 @@ namespace StreamHub
 
             /* ^^^ Gameveiwer Team Assembler ^^^ */
         }
+        private void Client_OnWhisperReceived(object sender, OnWhisperReceivedArgs e)
+        {
+            /*if (e.WhisperMessage.Username == "my_friend")
+                client.SendWhisper(e.WhisperMessage.Username, "Hey! Whispers are so cool!!");*/
+        }
+        private void Client_OnNewSubscriber(object sender, OnNewSubscriberArgs e)
+        {
+            /*if (e.Subscriber.SubscriptionPlan == SubscriptionPlan.Prime)
+                client.SendMessage(e.Channel, $"Welcome {e.Subscriber.DisplayName} to the substers! You just earned 500 points! So kind of you to use your Twitch Prime on this channel!");
+            else
+                client.SendMessage(e.Channel, $"Welcome {e.Subscriber.DisplayName} to the substers! You just earned 500 points!");
+            */
+        }
+        #endregion
 
+        #region Twitch Actions
         public void UpdateObsFiles()
         {
             if (!Directory.Exists("OBS")) Directory.CreateDirectory("OBS");
@@ -323,18 +395,86 @@ namespace StreamHub
         {
             c_nbr.Text = $"{GTAPoolList.Count} viewers queueing";
         }
-        private void Client_OnWhisperReceived(object sender, OnWhisperReceivedArgs e)
+        private void GTA_FullRandom()
         {
-            /*if (e.WhisperMessage.Username == "my_friend")
-                client.SendWhisper(e.WhisperMessage.Username, "Hey! Whispers are so cool!!");*/
+            int nbPlayers = 0;
+            foreach (Role r in config.GTA_roles)
+            {
+                nbPlayers += r.nbr;
+            }
+
+            Random rand = new Random();
+
+            int SelectedPlayersCount = GTAPoolList.FindAll(x => x.selected).Count;
+            int NotSelectedPlayersCount = GTAPoolList.FindAll(x => !x.selected).Count;
+
+            while (SelectedPlayersCount < nbPlayers && NotSelectedPlayersCount > 0)
+            {
+                int i = rand.Next(0, GTAPoolList.FindAll(x => !x.selected).Count - 1);
+                GTAPoolList.FindAll(x => !x.selected)[i].selected = true;
+
+                SelectedPlayersCount = GTAPoolList.FindAll(x => x.selected).Count;
+                NotSelectedPlayersCount = GTAPoolList.FindAll(x => !x.selected).Count;
+            }
         }
-        private void Client_OnNewSubscriber(object sender, OnNewSubscriberArgs e)
+        private void GTA_RandomByRole()
         {
-            /*if (e.Subscriber.SubscriptionPlan == SubscriptionPlan.Prime)
-                client.SendMessage(e.Channel, $"Welcome {e.Subscriber.DisplayName} to the substers! You just earned 500 points! So kind of you to use your Twitch Prime on this channel!");
-            else
-                client.SendMessage(e.Channel, $"Welcome {e.Subscriber.DisplayName} to the substers! You just earned 500 points!");
-            */
+            Random rand = new Random();
+
+            foreach (Role role in config.GTA_roles)
+            {
+                int SelectedPlayersCount = GTAPoolList.FindAll(x => x.selected && x.role.name == role.name).Count;
+                int NotSelectedPlayersCount = GTAPoolList.FindAll(x => !x.selected && x.role.name == role.name).Count;
+
+                while (SelectedPlayersCount < role.nbr && NotSelectedPlayersCount > 0)
+                {
+                    int i = rand.Next(0, NotSelectedPlayersCount - 1);
+                    GTAPoolList.FindAll(x => !x.selected && x.role.name == role.name)[i].selected = true;
+
+                    SelectedPlayersCount = GTAPoolList.FindAll(x => x.selected && x.role.name == role.name).Count;
+                    NotSelectedPlayersCount = GTAPoolList.FindAll(x => !x.selected && x.role.name == role.name).Count;
+                }
+            }
+        }
+        private void GTA_FIFO()
+        {
+            foreach (Role role in config.GTA_roles)
+            {
+                int SelectedPlayersCount = GTAPoolList.FindAll(x => x.selected && x.role.name == role.name).Count;
+                int NotSelectedPlayersCount = GTAPoolList.FindAll(x => !x.selected && x.role.name == role.name).Count;
+
+                while (SelectedPlayersCount < role.nbr && NotSelectedPlayersCount > 0)
+                {
+                    GTAPoolList.FindAll(x => !x.selected && x.role.name == role.name)[0].selected = true;
+
+                    SelectedPlayersCount = GTAPoolList.FindAll(x => x.selected && x.role.name == role.name).Count;
+                    NotSelectedPlayersCount = GTAPoolList.FindAll(x => !x.selected && x.role.name == role.name).Count;
+                }
+            }
+        }
+        private void GTA_LIFO()
+        {
+            foreach (Role role in config.GTA_roles)
+            {
+                int SelectedPlayersCount = GTAPoolList.FindAll(x => x.selected && x.role.name == role.name).Count;
+                int NotSelectedPlayersCount = GTAPoolList.FindAll(x => !x.selected && x.role.name == role.name).Count;
+
+                while (SelectedPlayersCount < role.nbr && NotSelectedPlayersCount > 0)
+                {
+                    int i = GTAPoolList.FindAll(x => !x.selected && x.role.name == role.name).Count;
+                    GTAPoolList.FindAll(x => !x.selected && x.role.name == role.name)[i - 1].selected = true;
+
+                    SelectedPlayersCount = GTAPoolList.FindAll(x => x.selected && x.role.name == role.name).Count;
+                    NotSelectedPlayersCount = GTAPoolList.FindAll(x => !x.selected && x.role.name == role.name).Count;
+                }
+            }
+        }
+        #endregion
+
+        #region Form events
+        private void SHubMain_Load(object sender, EventArgs e)
+        {
+
         }
         private void C_ConfigForm_Click(object sender, EventArgs e)
         {
@@ -346,7 +486,7 @@ namespace StreamHub
                 client.Disconnect();
                 client.Connect();
             }
-            
+
         }
         private void c_viewerpool_startstop_Click(object sender, EventArgs e)
         {
@@ -359,7 +499,7 @@ namespace StreamHub
             else
             {
                 c_viewerpool_startstop.ForeColor = Color.Green;
-                ViewerPool_Status = true; 
+                ViewerPool_Status = true;
                 client.SendMessage(channel, "ViewerPool Started");
             }
         }
@@ -431,82 +571,6 @@ namespace StreamHub
                 client.SendMessage(channel, $"Gameviewer will start with the following players : {SelectedPlayers.TrimEnd(',')}.");
             }
         }
-
-        private void GTA_FullRandom()
-        {
-            int nbPlayers = 0;
-            foreach(Role r in config.GTA_roles)
-            {
-                nbPlayers += r.nbr;
-            }
-
-            Random rand = new Random();
-
-            int SelectedPlayersCount = GTAPoolList.FindAll(x => x.selected).Count;
-            int NotSelectedPlayersCount = GTAPoolList.FindAll(x => !x.selected).Count;
-
-            while (SelectedPlayersCount < nbPlayers && NotSelectedPlayersCount > 0)
-            {
-                int i = rand.Next(0, GTAPoolList.FindAll(x => !x.selected).Count-1);
-                GTAPoolList.FindAll(x => !x.selected)[i].selected = true;
-                                
-                SelectedPlayersCount = GTAPoolList.FindAll(x => x.selected).Count;
-                NotSelectedPlayersCount = GTAPoolList.FindAll(x => !x.selected).Count;
-            }
-        }
-        private void GTA_RandomByRole()
-        {
-            Random rand = new Random();
-
-            foreach (Role role in config.GTA_roles)
-            {
-                int SelectedPlayersCount = GTAPoolList.FindAll(x => x.selected && x.role.name == role.name).Count;
-                int NotSelectedPlayersCount = GTAPoolList.FindAll(x => !x.selected && x.role.name == role.name).Count;
-
-                while (SelectedPlayersCount < role.nbr && NotSelectedPlayersCount > 0)
-                {
-                    int i = rand.Next(0, NotSelectedPlayersCount - 1);
-                    GTAPoolList.FindAll(x => !x.selected && x.role.name == role.name)[i].selected = true;
-
-                    SelectedPlayersCount = GTAPoolList.FindAll(x => x.selected && x.role.name == role.name).Count;
-                    NotSelectedPlayersCount = GTAPoolList.FindAll(x => !x.selected && x.role.name == role.name).Count;
-                }
-            }
-        }
-        private void GTA_FIFO()
-        {
-            foreach (Role role in config.GTA_roles)
-            {
-                int SelectedPlayersCount = GTAPoolList.FindAll(x => x.selected && x.role.name == role.name).Count;
-                int NotSelectedPlayersCount = GTAPoolList.FindAll(x => !x.selected && x.role.name == role.name).Count;
-
-                while (SelectedPlayersCount < role.nbr && NotSelectedPlayersCount > 0)
-                {
-                    GTAPoolList.FindAll(x => !x.selected && x.role.name == role.name)[0].selected = true;
-
-                    SelectedPlayersCount = GTAPoolList.FindAll(x => x.selected && x.role.name == role.name).Count;
-                    NotSelectedPlayersCount = GTAPoolList.FindAll(x => !x.selected && x.role.name == role.name).Count;
-                }
-            }
-        }
-        private void GTA_LIFO()
-        {
-            foreach (Role role in config.GTA_roles)
-            {
-                int SelectedPlayersCount = GTAPoolList.FindAll(x => x.selected && x.role.name == role.name).Count;
-                int NotSelectedPlayersCount = GTAPoolList.FindAll(x => !x.selected && x.role.name == role.name).Count;
-
-                while (SelectedPlayersCount < role.nbr && NotSelectedPlayersCount > 0)
-                {
-                    int i = GTAPoolList.FindAll(x => !x.selected && x.role.name == role.name).Count;
-                    GTAPoolList.FindAll(x => !x.selected && x.role.name == role.name)[i - 1].selected = true;
-
-                    SelectedPlayersCount = GTAPoolList.FindAll(x => x.selected && x.role.name == role.name).Count;
-                    NotSelectedPlayersCount = GTAPoolList.FindAll(x => !x.selected && x.role.name == role.name).Count;
-                }
-            }
-        }
-
         private void c_ResetSelection_Click(object sender, EventArgs e)
         {
             if (GTA_status) return;
@@ -519,12 +583,20 @@ namespace StreamHub
         }
         private void SHubMain_FormClosing(object sender, FormClosingEventArgs e)
         {
-            try { client.SendMessage(channel, $"{config.BotName}.exe a cessé de fonctionner."); } catch (Exception) { }    
+            try { client.SendMessage(channel, $"{config.BotName}.exe a cessé de fonctionner."); } catch (Exception) { }
         }
-        private void SHubMain_Load(object sender, EventArgs e)
+        private void c_VisualMode_Click(object sender, EventArgs e)
         {
-            GetControlsColors(this);
+            SwitchColor(this);
         }
+        private void c_Overlay_Click(object sender, EventArgs e)
+        {
+            if (!_window.IsPaused) { _window.Hide(); _window.Pause(); }
+            else { _window.Unpause(); _window.Show(); }
+        }
+        #endregion
+
+        #region Form Actions
         private void GetControlsColors(object o)
         {
             if (o is Form f)
@@ -546,7 +618,7 @@ namespace StreamHub
             }
             else if (o is ControlCollection cc)
             {
-                foreach(Control cl in cc) { GetControlsColors(cl); }
+                foreach (Control cl in cc) { GetControlsColors(cl); }
             }
         }
         private void SwitchColor(object o)
@@ -602,22 +674,16 @@ namespace StreamHub
                         break;
                 }
 
-                foreach (Control cl in c.Controls) {  SwitchColor(cl.Controls); }
+                foreach (Control cl in c.Controls) { SwitchColor(cl.Controls); }
             }
             else if (o is ControlCollection cc)
             {
                 foreach (Control cl in cc) { SwitchColor(cl); }
             }
         }
-        private void c_VisualMode_Click(object sender, EventArgs e)
-        {
-            SwitchColor(this);
-        }
+        #endregion
 
-        private void c_Overlay_Click(object sender, EventArgs e)
-        {
-            if (!_window.IsPaused) { _window.Hide(); _window.Pause(); }
-            else { _window.Unpause(); _window.Show(); }
-        }
+        
+
     }
 }
