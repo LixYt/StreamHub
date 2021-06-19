@@ -173,7 +173,7 @@ namespace StreamHub
             if (message.Content == "!ping")
                 await message.Channel.SendMessageAsync("pong!");
         }
-        #region
+        #endregion
 
         #region Disocrd Actions
         private async Task DiscordTask()
@@ -262,6 +262,33 @@ namespace StreamHub
                 LastLines.Add($"{e.ChatMessage.Username} : {e.ChatMessage.Message}");
                 if (LastLines.Count > 15) LastLines.RemoveAt(0);
 
+                /* VierwerPool dice tool */
+                string pattern = @"^(\d{1,2})d(\d{1,3})$";
+                if (config.ViewerPool_CanRollDice && e.ChatMessage.Username == SelectedUser && Regex.Matches(e.ChatMessage.Message, pattern, RegexOptions.IgnoreCase).Count == 1) //+regex 0d000
+                {
+                    int nb_dice = int.Parse(e.ChatMessage.Message.Split('d')[0]);
+                    int diceSize = int.Parse(e.ChatMessage.Message.Split('d')[1]);
+
+                    if (nb_dice < 1 || diceSize > 100 || diceSize < 2)
+                    {
+                        client.SendMessage(e.ChatMessage.Channel, $"{e.ChatMessage.Username} tu as mal lancé les dès.");
+                    }
+                    else
+                    {
+                        int result = 0;
+                        string dices = "";
+                        Random r = new Random();
+                        for (int i = 1; i <= nb_dice; i++)
+                        {
+                            int a = r.Next(1, diceSize + 1);
+                            result += a;
+                            dices += $"{a},";
+                        }
+
+                        client.SendMessage(e.ChatMessage.Channel, $"{e.ChatMessage.Username} a lancé {e.ChatMessage.Message} et obtenu : ({dices.TrimEnd(',')}) pour un total de {result} !");
+                    }
+                }
+
                 return;
             }
 
@@ -282,33 +309,6 @@ namespace StreamHub
                     UpdateObsFiles();
                 }
             }
-
-            string pattern = @"^(\d{1,2})d(\d{1,3})$";
-            if (config.ViewerPool_CanRollDice && e.ChatMessage.Username == SelectedUser && Regex.Matches(e.ChatMessage.Message, pattern, RegexOptions.IgnoreCase).Count == 1) //+regex 0d000
-            {
-                int nb_dice = int.Parse(e.ChatMessage.Message.Split('d')[0]);
-                int diceSize = int.Parse(e.ChatMessage.Message.Split('d')[1]);
-
-                if (nb_dice < 1 || diceSize > 100 || diceSize < 2)
-                {
-                    client.SendMessage(e.ChatMessage.Channel, $"{e.ChatMessage.Username} tu as mal lancé les dès.");
-                }
-                else
-                {
-                    int result = 0;
-                    string dices = "";
-                    Random r = new Random();
-                    for (int i = 1; i <= nb_dice; i++)
-                    {
-                        int a = r.Next(1, diceSize + 1);
-                        result += a;
-                        dices += $"{a},";
-                    }
-
-                    client.SendMessage(e.ChatMessage.Channel, $"{e.ChatMessage.Username} a lancé {e.ChatMessage.Message} et obtenu : ({dices.TrimEnd(',')}) pour un total de {result} !");
-                }
-            }
-
             /* ^^^ ViewerPool ^^^ */
 
             /* vvv Gameveiwer Team Assembler vvv */
@@ -583,7 +583,7 @@ namespace StreamHub
         }
         private void SHubMain_FormClosing(object sender, FormClosingEventArgs e)
         {
-            try { client.SendMessage(channel, $"{config.BotName}.exe a cessé de fonctionner."); } catch (Exception) { }
+            try { client.SendMessage(channel, $"/me a cessé de fonctionner."); } catch (Exception) { }
         }
         private void c_VisualMode_Click(object sender, EventArgs e)
         {
