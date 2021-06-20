@@ -44,6 +44,22 @@ namespace StreamHub
             SHubConfiguration.GTA_roles ??= new List<Role>();
             BindingSource source = new BindingSource(GTARoles, null);
             c_roles.DataSource = source;
+
+            foreach (var screen in Screen.AllScreens)
+            {
+                c_overlay_display.Items.Add(screen.DeviceName);
+            }
+
+            c_overlay_width.Maximum = Screen.PrimaryScreen.Bounds.Width;
+            c_overlay_height.Maximum = Screen.PrimaryScreen.Bounds.Height;
+            c_overlay_x.Maximum = Screen.PrimaryScreen.Bounds.Width;
+            c_overlay_y.Maximum = Screen.PrimaryScreen.Bounds.Height;
+
+            c_overlay_width.Value = SHubConfiguration.Overlay_width;
+            c_overlay_height.Value = SHubConfiguration.Overlay_height;
+            c_overlay_x.Value = SHubConfiguration.Overlay_x;
+            c_overlay_y.Value = SHubConfiguration.Overlay_y;
+            c_Overlay_FontSize.Value = (SHubConfiguration.Overlay_FontSize < 8 ? 20 : SHubConfiguration.Overlay_FontSize);
         }
 
         private void c_Save_Click(object sender, EventArgs e)
@@ -63,6 +79,12 @@ namespace StreamHub
             if (c_GTA_modeLIFO.Checked) SHubConfiguration.GTA_mode = c_GTA_modeLIFO.Name;
             if (c_GTA_modeRR.Checked) SHubConfiguration.GTA_mode = c_GTA_modeRR.Name;
             if (c_GTA_mode_Rfull.Checked) SHubConfiguration.GTA_mode = c_GTA_mode_Rfull.Name;
+
+            SHubConfiguration.Overlay_width = c_overlay_width.Value; 
+            SHubConfiguration.Overlay_height = c_overlay_height.Value;
+            SHubConfiguration.Overlay_x = c_overlay_x.Value;
+            SHubConfiguration.Overlay_y = c_overlay_y.Value;
+            SHubConfiguration.Overlay_FontSize = (int)c_Overlay_FontSize.Value;
         }
 
         private void SHubConfigPanel_FormClosed(object sender, FormClosedEventArgs e)
@@ -103,7 +125,27 @@ namespace StreamHub
 
         private void c_botVerif_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            System.Diagnostics.Process.Start(new ProcessStartInfo("https://dev.twitch.tv/limit-increase") { UseShellExecute = true });
+            Process.Start(new ProcessStartInfo("https://dev.twitch.tv/limit-increase") { UseShellExecute = true });
+        }
+
+        private void c_overlay_x_ValueChanged(object sender, EventArgs e)
+        {
+            c_overlay_currentX.Text = c_overlay_x.Value.ToString();
+        }
+
+        private void c_overlay_y_ValueChanged(object sender, EventArgs e)
+        {
+            c_overlay_currentY.Text = c_overlay_y.Value.ToString();
+        }
+
+        private void c_overlay_width_ValueChanged(object sender, EventArgs e)
+        {
+            c_overlay_currentW.Text = c_overlay_width.Value.ToString();
+        }
+
+        private void c_overlay_height_ValueChanged(object sender, EventArgs e)
+        {
+            c_overlay_currentH.Text = c_overlay_height.Value.ToString();
         }
     }
 }

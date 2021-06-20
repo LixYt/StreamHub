@@ -26,6 +26,7 @@ using Rectangle = GameOverlay.Drawing.Rectangle;
 using Discord;
 using Discord.WebSocket;
 using System.Threading.Tasks;
+using Point = GameOverlay.Drawing.Point;
 
 namespace StreamHub
 {
@@ -50,7 +51,7 @@ namespace StreamHub
         private readonly Dictionary<string, Image> _images;
 
         private Geometry _gridGeometry;
-        private Rectangle _gridBounds;
+        //private Rectangle _gridBounds;
 
         private List<string> LastLines = new List<string>();
 
@@ -60,10 +61,14 @@ namespace StreamHub
         {
             InitializeComponent();
 
-            #region Twitch
-            client = new TwitchClient();
             cfg = cfg ?? new SHubConfig();
             config = cfg;
+
+            config.Overlay_FontSize = (config.Overlay_FontSize == 0 ? 14 : config.Overlay_FontSize);
+
+
+            #region Twitch
+            client = new TwitchClient();
 
             SHubConfigPanel ConfigPannel = new SHubConfigPanel(config);
             while (!config.isSetup())
@@ -125,7 +130,7 @@ namespace StreamHub
                 TextAntiAliasing = true
             };
 
-            _window = new GraphicsWindow(0, 1080-600, 800, 600, gfx)
+            _window = new GraphicsWindow(config.Overlay_width, 1080-config.Overlay_height, config.Overlay_width, config.Overlay_height, gfx)
             {
                 FPS = 60,
                 IsTopmost = true,
@@ -216,26 +221,71 @@ namespace StreamHub
 
             if (e.RecreateResources) return;
 
-            _fonts["arial"] = gfx.CreateFont("Arial", 12);
-            _fonts["consolas"] = gfx.CreateFont("Consolas", 14);
+            SetOverlayFonts();
 
-            _gridBounds = new Rectangle(20, 60, gfx.Width - 20, gfx.Height - 20);
+            //_gridBounds = new Rectangle(20, 60, gfx.Width - 20, gfx.Height - 20);
             _gridGeometry = gfx.CreateGeometry();
 
             _gridGeometry.Close();
         }
+
+        public void SetOverlayFonts()
+        {
+            var gfx = _window.Graphics;
+
+            _fonts.Clear();
+            _fonts["arial"] = gfx.CreateFont("Arial", 12);
+            _fonts["consolas"] = gfx.CreateFont("Consolas", config.Overlay_FontSize);
+        }
+
         private void _window_DrawGraphics(object sender, DrawGraphicsEventArgs e)
         {
             Graphics gfx = e.Graphics;
+            if (_window.X != config.Overlay_x || _window.Y != config.Overlay_y || _window.Width != config.Overlay_width || _window.Height != config.Overlay_height)
+            {
+                _window.X = config.Overlay_x;
+                _window.Y = config.Overlay_y;
+                _window.Width = config.Overlay_width;
+                _window.Height = config.Overlay_height;
+                _window.Recreate();
+            }
+
+            if (_fonts["consolas"].FontSize != config.Overlay_FontSize) SetOverlayFonts();
 
             var infoText = new StringBuilder().ToString();
             foreach (string s in LastLines)
             {
-                infoText = new StringBuilder().Append(infoText).Append($"{s}\r\n").ToString();
+                string newLine = $"{s}\r\n";
+                Point p = gfx.MeasureString(_fonts["consolas"], config.Overlay_FontSize, newLine);
+                
+                if (p.X > _window.Width)
+                {
+                    string newLines = "";
+                    newLine = s;
+
+                    float ratio = _window.Width / p.X;
+                    float part = p.X / _window.Width;
+                    float lenString = ratio * newLine.Length;
+
+                    for (int i = 1; i < part+1; i++)
+                    {
+                        float lenNewLines = (newLine.Length < lenString ? newLine.Length-1 : (int)lenString); ;
+                        newLines += $"{newLine.Substring(0, (int)lenNewLines)}\r\n";
+                        newLine = newLine[(int)lenNewLines..];
+                    }
+
+                    infoText = new StringBuilder().Append(infoText).Append(newLines).ToString();
+                }
+                else
+                {
+                    infoText = new StringBuilder().Append(infoText).Append(newLine).ToString();
+                }
+                
             }
 
             gfx.ClearScene(_brushes["background"]);
-            gfx.DrawTextWithBackground(_fonts["consolas"], _brushes["lightBlue"], gfx.CreateSolidBrush(0, 0, 0, 128), 58, 20, infoText);
+            
+            gfx.DrawTextWithBackground(_fonts["consolas"], _brushes["lightBlue"], gfx.CreateSolidBrush(0, 0, 0, 128), 0, 0, infoText);
             gfx.DrawGeometry(_gridGeometry, _brushes["grid"], 1.0f);
 
         }

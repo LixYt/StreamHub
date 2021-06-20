@@ -26,7 +26,15 @@ namespace StreamHub
         public bool ViewerPool_CanRollDice = false;
 
         public List<Role> GTA_roles = new List<Role>();
-        public string GTA_mode = ""; 
+        public string GTA_mode = "";
+
+        public int Overlay_x = 1;
+        public int Overlay_y = 1;
+        public int Overlay_width = 800;
+        public int Overlay_height = 600;
+        public string Overlay_monitor = null;
+        public int Overlay_FontSize = 20;
+
 
         public SHubConfig()
         {
@@ -89,7 +97,7 @@ namespace StreamHub
         private Role roleValue;
         private bool selectedValue;
 
-        private void NotifyPropertyChanged([CallerMemberName] String propertyName = "")
+        private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
         {
             if (PropertyChanged != null)
             {
