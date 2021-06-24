@@ -32,6 +32,8 @@ namespace StreamHub
             c_ViewerPool_RegisterCommand.Text = SHubConfiguration.ViewerPool_RegisterCommand;
             c_ViewerPool_CanRollDice.Checked = SHubConfiguration.ViewerPool_CanRollDice;
 
+            c_Twitch_ClientID.Text = SHubConfiguration.Twitch_ClientID;
+
             switch (SHubConfiguration.GTA_mode)
             {
                 case "c_GTA_modeFIFO": c_GTA_modeFIFO.Checked = true; break;
@@ -85,6 +87,8 @@ namespace StreamHub
             SHubConfiguration.Overlay_x = c_overlay_x.Value;
             SHubConfiguration.Overlay_y = c_overlay_y.Value;
             SHubConfiguration.Overlay_FontSize = (int)c_Overlay_FontSize.Value;
+
+            SHubConfiguration.Twitch_ClientID = c_Twitch_ClientID.Text;
         }
 
         private void SHubConfigPanel_FormClosed(object sender, FormClosedEventArgs e)

@@ -35,7 +35,7 @@ namespace StreamHub
         public string Overlay_monitor = null;
         public int Overlay_FontSize = 20;
 
-
+        public string Twitch_ClientID = "";
         public SHubConfig()
         {
 

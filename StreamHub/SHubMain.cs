@@ -66,10 +66,6 @@ namespace StreamHub
 
             config.Overlay_FontSize = (config.Overlay_FontSize == 0 ? 14 : config.Overlay_FontSize);
 
-
-            #region Twitch
-            client = new TwitchClient();
-
             SHubConfigPanel ConfigPannel = new SHubConfigPanel(config);
             while (!config.isSetup())
             {
@@ -80,6 +76,9 @@ namespace StreamHub
 
 
             Text = $"{config.BotName}";
+
+            #region Twitch
+            client = new TwitchClient();
 
             try
             {
@@ -183,7 +182,7 @@ namespace StreamHub
         #region Disocrd Actions
         private async Task DiscordTask()
         {
-            await _client.LoginAsync(TokenType.Bot, DiscordConfig.Token);
+            await _client.LoginAsync(TokenType.Bot, config.Twitch_ClientID);
             await _client.StartAsync();
             //need to add an URL to join the bot to the discord server
             //https://discord.com/api/oauth2/authorize?client_id=157730590492196864&scope=bot&permissions=1
@@ -280,7 +279,6 @@ namespace StreamHub
                 {
                     infoText = new StringBuilder().Append(infoText).Append(newLine).ToString();
                 }
-                
             }
 
             gfx.ClearScene(_brushes["background"]);
@@ -641,8 +639,8 @@ namespace StreamHub
         }
         private void c_Overlay_Click(object sender, EventArgs e)
         {
-            if (!_window.IsPaused) { _window.Hide(); _window.Pause(); }
-            else { _window.Unpause(); _window.Show(); }
+            if (!_window.IsPaused) { _window.Hide(); _window.Pause(); c_Overlay.ForeColor = Color.Red; }
+            else { _window.Unpause(); _window.Show(); c_Overlay.ForeColor = Color.Green; }
         }
         #endregion
 

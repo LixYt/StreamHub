@@ -237,6 +237,7 @@ namespace StreamHub
             // c_Overlay
             // 
             this.c_Overlay.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.c_Overlay.ForeColor = System.Drawing.Color.Green;
             this.c_Overlay.Location = new System.Drawing.Point(307, 5);
             this.c_Overlay.Name = "c_Overlay";
             this.c_Overlay.Size = new System.Drawing.Size(113, 23);
