@@ -32,7 +32,7 @@ namespace StreamHub
         public int Overlay_y = 1;
         public int Overlay_width = 800;
         public int Overlay_height = 600;
-        public string Overlay_monitor = null;
+        public string Overlay_monitor = "";
         public int Overlay_FontSize = 20;
 
         public string Twitch_ClientID = "";
@@ -105,4 +105,28 @@ namespace StreamHub
             }
         }
     }
+
+    [Serializable]
+    public class GameUser : INotifyPropertyChanged
+    {
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public string UserName { get { return userNameValue; } set { userNameValue = value; NotifyPropertyChanged(); } }
+        public DateTime? Connection { get { return connectionValue; } set { connectionValue = value; NotifyPropertyChanged(); } }
+        public DateTime? Disconnection { get { return disconnectionValue; } set { disconnectionValue = value; NotifyPropertyChanged(); } }
+
+        private string userNameValue;
+        private DateTime? connectionValue;
+        private DateTime? disconnectionValue;
+
+        private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+    }
+
 }

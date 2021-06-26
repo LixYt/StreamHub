@@ -44,12 +44,16 @@ namespace StreamHub
             this.tab_ViewerPool = new System.Windows.Forms.TabPage();
             this.tab_GTA = new System.Windows.Forms.TabPage();
             this.c_nbr = new System.Windows.Forms.Label();
+            this.tab_Data = new System.Windows.Forms.TabPage();
+            this.c_ConnectedUsers = new System.Windows.Forms.DataGridView();
             this.c_VisualMode = new System.Windows.Forms.Button();
             this.c_Overlay = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.c_GTAPool)).BeginInit();
             this.c_features.SuspendLayout();
             this.tab_ViewerPool.SuspendLayout();
             this.tab_GTA.SuspendLayout();
+            this.tab_Data.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.c_ConnectedUsers)).BeginInit();
             this.SuspendLayout();
             // 
             // C_ConfigForm
@@ -178,6 +182,7 @@ namespace StreamHub
             | System.Windows.Forms.AnchorStyles.Right)));
             this.c_features.Controls.Add(this.tab_ViewerPool);
             this.c_features.Controls.Add(this.tab_GTA);
+            this.c_features.Controls.Add(this.tab_Data);
             this.c_features.Location = new System.Drawing.Point(0, 12);
             this.c_features.Name = "c_features";
             this.c_features.SelectedIndex = 0;
@@ -223,6 +228,30 @@ namespace StreamHub
             this.c_nbr.TabIndex = 13;
             this.c_nbr.Text = "x viewers in queue";
             // 
+            // tab_Data
+            // 
+            this.tab_Data.Controls.Add(this.c_ConnectedUsers);
+            this.tab_Data.Location = new System.Drawing.Point(4, 24);
+            this.tab_Data.Name = "tab_Data";
+            this.tab_Data.Padding = new System.Windows.Forms.Padding(3);
+            this.tab_Data.Size = new System.Drawing.Size(620, 418);
+            this.tab_Data.TabIndex = 2;
+            this.tab_Data.Text = "Data";
+            this.tab_Data.UseVisualStyleBackColor = true;
+            // 
+            // c_ConnectedUsers
+            // 
+            this.c_ConnectedUsers.AllowUserToAddRows = false;
+            this.c_ConnectedUsers.AllowUserToDeleteRows = false;
+            this.c_ConnectedUsers.AllowUserToOrderColumns = true;
+            this.c_ConnectedUsers.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.c_ConnectedUsers.Location = new System.Drawing.Point(8, 15);
+            this.c_ConnectedUsers.Name = "c_ConnectedUsers";
+            this.c_ConnectedUsers.ReadOnly = true;
+            this.c_ConnectedUsers.RowTemplate.Height = 25;
+            this.c_ConnectedUsers.Size = new System.Drawing.Size(408, 222);
+            this.c_ConnectedUsers.TabIndex = 0;
+            // 
             // c_VisualMode
             // 
             this.c_VisualMode.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -265,6 +294,8 @@ namespace StreamHub
             this.tab_ViewerPool.ResumeLayout(false);
             this.tab_GTA.ResumeLayout(false);
             this.tab_GTA.PerformLayout();
+            this.tab_Data.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.c_ConnectedUsers)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -290,5 +321,7 @@ namespace StreamHub
         private System.Windows.Forms.Label c_nbr;
         private System.Windows.Forms.Button c_VisualMode;
         private System.Windows.Forms.Button c_Overlay;
+        private System.Windows.Forms.TabPage tab_Data;
+        private System.Windows.Forms.DataGridView c_ConnectedUsers;
     }
 }

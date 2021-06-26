@@ -52,6 +52,8 @@ namespace StreamHub
                 c_overlay_display.Items.Add(screen.DeviceName);
             }
 
+            c_overlay_display.Text = SHubConfiguration.Overlay_monitor;
+
             c_overlay_width.Maximum = Screen.PrimaryScreen.Bounds.Width;
             c_overlay_height.Maximum = Screen.PrimaryScreen.Bounds.Height;
             c_overlay_x.Maximum = Screen.PrimaryScreen.Bounds.Width;
@@ -82,6 +84,7 @@ namespace StreamHub
             if (c_GTA_modeRR.Checked) SHubConfiguration.GTA_mode = c_GTA_modeRR.Name;
             if (c_GTA_mode_Rfull.Checked) SHubConfiguration.GTA_mode = c_GTA_mode_Rfull.Name;
 
+            SHubConfiguration.Overlay_monitor = c_overlay_display.Text; 
             SHubConfiguration.Overlay_width = c_overlay_width.Value; 
             SHubConfiguration.Overlay_height = c_overlay_height.Value;
             SHubConfiguration.Overlay_x = c_overlay_x.Value;

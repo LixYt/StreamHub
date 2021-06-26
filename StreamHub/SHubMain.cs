@@ -41,7 +41,9 @@ namespace StreamHub
 
         public List<string> ViewerPoolList { get; set; } = new List<string>();
         public List<GTA_User> GTAPoolList { get; set; } = new List<GTA_User>();
+        public List<GameUser> ConnectedUsers { get; set; } = new List<GameUser>();
 
+        private BindingList<GameUser> UsersList;
         private BindingList<GTA_User> GTAList;
         private string SelectedUser = "";
 
@@ -51,16 +53,19 @@ namespace StreamHub
         private readonly Dictionary<string, Image> _images;
 
         private Geometry _gridGeometry;
-        //private Rectangle _gridBounds;
 
         private List<string> LastLines = new List<string>();
 
         private readonly DiscordSocketClient _client;
 
+        
+        
+
         public SHubMain(SHubConfig cfg)
         {
             InitializeComponent();
 
+            #region Load Configuration
             cfg = cfg ?? new SHubConfig();
             config = cfg;
 
@@ -74,8 +79,8 @@ namespace StreamHub
                 else { Load += (s, e) => Close(); break; }
             }
 
-
             Text = $"{config.BotName}";
+            #endregion
 
             #region Twitch
             client = new TwitchClient();
@@ -96,6 +101,8 @@ namespace StreamHub
                 client.OnWhisperReceived += Client_OnWhisperReceived;
                 client.OnNewSubscriber += Client_OnNewSubscriber;
                 client.OnConnected += Client_OnConnected;
+                client.OnUserJoined += Client_OnUserJoined;
+                client.OnUserLeft += Client_OnUserLeft;
 
                 client.Connect();
 
@@ -109,10 +116,16 @@ namespace StreamHub
             #region Twitch_Features
             c_GTAPool.AutoGenerateColumns = true;
 
+            //Bindings
             GTAList = new BindingList<GTA_User>(GTAPoolList);
             BindingSource source = new BindingSource(GTAList, null);
             c_GTAPool.DataSource = source;
 
+            UsersList = new BindingList<GameUser>(ConnectedUsers);
+            BindingSource sourceUsers = new BindingSource(UsersList, null);
+            c_ConnectedUsers.DataSource = sourceUsers;
+
+            //txt File output for OBS
             UpdateObsFiles();
             UpdateGTACount();
             #endregion
@@ -128,10 +141,10 @@ namespace StreamHub
                 PerPrimitiveAntiAliasing = true,
                 TextAntiAliasing = true
             };
-
+            
             _window = new GraphicsWindow(config.Overlay_width, 1080-config.Overlay_height, config.Overlay_width, config.Overlay_height, gfx)
             {
-                FPS = 60,
+                FPS = 30,
                 IsTopmost = true,
                 IsVisible = true
             };
@@ -155,6 +168,7 @@ namespace StreamHub
             #endregion
         }
 
+        
 
         #region Discord Events
         private Task LogAsync(LogMessage log)
@@ -239,52 +253,57 @@ namespace StreamHub
 
         private void _window_DrawGraphics(object sender, DrawGraphicsEventArgs e)
         {
-            Graphics gfx = e.Graphics;
-            if (_window.X != config.Overlay_x || _window.Y != config.Overlay_y || _window.Width != config.Overlay_width || _window.Height != config.Overlay_height)
+            try
             {
-                _window.X = config.Overlay_x;
-                _window.Y = config.Overlay_y;
-                _window.Width = config.Overlay_width;
-                _window.Height = config.Overlay_height;
-                _window.Recreate();
-            }
-
-            if (_fonts["consolas"].FontSize != config.Overlay_FontSize) SetOverlayFonts();
-
-            var infoText = new StringBuilder().ToString();
-            foreach (string s in LastLines)
-            {
-                string newLine = $"{s}\r\n";
-                Point p = gfx.MeasureString(_fonts["consolas"], config.Overlay_FontSize, newLine);
-                
-                if (p.X > _window.Width)
+                Graphics gfx = e.Graphics;
+                if (_window.X != config.Overlay_x || _window.Y != config.Overlay_y || _window.Width != config.Overlay_width || _window.Height != config.Overlay_height)
                 {
-                    string newLines = "";
-                    newLine = s;
+                    _window.X = config.Overlay_x;
+                    _window.Y = config.Overlay_y;
+                    _window.Width = config.Overlay_width;
+                    _window.Height = config.Overlay_height;
+                    _window.Recreate();
+                }
 
-                    float ratio = _window.Width / p.X;
-                    float part = p.X / _window.Width;
-                    float lenString = ratio * newLine.Length;
+                if (_fonts["consolas"].FontSize != config.Overlay_FontSize) SetOverlayFonts();
 
-                    for (int i = 1; i < part+1; i++)
+                var infoText = new StringBuilder().ToString();
+                foreach (string s in LastLines)
+                {
+                    string newLine = $"{s}\r\n";
+                    Point p = gfx.MeasureString(_fonts["consolas"], config.Overlay_FontSize, newLine);
+
+                    if (p.X > _window.Width)
                     {
-                        float lenNewLines = (newLine.Length < lenString ? newLine.Length-1 : (int)lenString); ;
-                        newLines += $"{newLine.Substring(0, (int)lenNewLines)}\r\n";
-                        newLine = newLine[(int)lenNewLines..];
+                        string newLines = "";
+                        newLine = s;
+
+                        float ratio = _window.Width / p.X;
+                        float part = p.X / _window.Width;
+                        float lenString = ratio * newLine.Length;
+
+                        for (int i = 1; i < part + 1; i++)
+                        {
+                            float lenNewLines = (newLine.Length < lenString ? newLine.Length - 1 : (int)lenString); ;
+                            newLines += $"{newLine.Substring(0, (int)lenNewLines)}\r\n";
+                            newLine = newLine[(int)lenNewLines..];
+                        }
+
+                        infoText = new StringBuilder().Append(infoText).Append(newLines).ToString();
                     }
+                    else
+                    {
+                        infoText = new StringBuilder().Append(infoText).Append(newLine).ToString();
+                    }
+                }
 
-                    infoText = new StringBuilder().Append(infoText).Append(newLines).ToString();
-                }
-                else
-                {
-                    infoText = new StringBuilder().Append(infoText).Append(newLine).ToString();
-                }
+                gfx.ClearScene(_brushes["background"]);
+
+                gfx.DrawTextWithBackground(_fonts["consolas"], _brushes["lightBlue"], gfx.CreateSolidBrush(0, 0, 0, 128), 0, 0, infoText);
+                gfx.DrawGeometry(_gridGeometry, _brushes["grid"], 1.0f);
             }
-
-            gfx.ClearScene(_brushes["background"]);
+            catch (Exception ex) { Debug.WriteLine("An error has occured while updating twitch chat overlay."); }
             
-            gfx.DrawTextWithBackground(_fonts["consolas"], _brushes["lightBlue"], gfx.CreateSolidBrush(0, 0, 0, 128), 0, 0, infoText);
-            gfx.DrawGeometry(_gridGeometry, _brushes["grid"], 1.0f);
 
         }
         #endregion
@@ -401,6 +420,18 @@ namespace StreamHub
                 client.SendMessage(e.Channel, $"Welcome {e.Subscriber.DisplayName} to the substers! You just earned 500 points!");
             */
         }
+        private void Client_OnUserJoined(object sender, OnUserJoinedArgs e)
+        {
+            Invoke(new Action(() => UsersList.Add(new GameUser() { UserName = e.Username, Connection = DateTime.Now, Disconnection = null })));
+            Debug.WriteLine($"[Twitch] {e.Username} connected to the tchat");
+        }
+        private void Client_OnUserLeft(object sender, OnUserLeftArgs e)
+        {
+            GameUser g = ConnectedUsers.FindLast(x => x.UserName == e.Username);
+            g.Disconnection = DateTime.Now;
+            Debug.WriteLine($"[Twitch] {e.Username} disconnected to the tchat");
+        }
+
         #endregion
 
         #region Twitch Actions
