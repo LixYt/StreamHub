@@ -81,12 +81,11 @@ namespace ViewerGameWorker
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            
-            while (!stoppingToken.IsCancellationRequested)
+            /*while (!stoppingToken.IsCancellationRequested)
             {
                 _logger.LogInformation($"Channel is : {channel}");
                 await Task.Delay(3000, stoppingToken);
-            }
+            }*/
         }
 
         #region Twitch
@@ -117,7 +116,6 @@ namespace ViewerGameWorker
         }
         private void Client_OnLog(object sender, OnLogArgs e)
         {
-            TwitchClient.SendMessage(channel, "connected");
             _logger.LogInformation("Connected to twitch chat");
         }
         private void Client_OnConnected(object sender, OnConnectedArgs e)
@@ -140,9 +138,10 @@ namespace ViewerGameWorker
             }
             else //message is a command
             {
-                switch(e.ChatMessage.Message[1..])
+                string msg = e.ChatMessage.Message.Substring(1);
+                switch (msg)
                 {
-                    case "Test":
+                    case "test":
                         TwitchClient.SendMessage(channel, "Test succesfull");
                         break;
                 }
