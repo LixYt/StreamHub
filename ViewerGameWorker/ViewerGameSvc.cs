@@ -122,7 +122,6 @@ namespace ViewerGameWorker
         }
         private void Client_OnConnected(object sender, OnConnectedArgs e)
         {
-            TwitchClient.SendMessage(channel, "connected");
 
         }
         private void Client_OnJoinedChannel(object sender, OnJoinedChannelArgs e)
