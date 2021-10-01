@@ -38,8 +38,7 @@ namespace ViewerGameWorker
                 Setup_Twitch();
                 try
                 {
-                    var connString = "Data Source=code-ex.fr;Initial Catalog=JarLix;Integrated Security=False;user id=bot;password=Azerty123+";
-                    ctx = new ViewerGameContext(connString);
+                    ctx = new ViewerGameContext(config.DbString);
                 }
                 catch(Exception ex) { _logger.LogError(ex.Message); }
                 
@@ -110,7 +109,7 @@ namespace ViewerGameWorker
             try
             {
                 TwitchClient = new TwitchClient();
-                TwitchClient.Initialize(config.GetCredential(), config.ChannelName);
+                TwitchClient.Initialize(config.GetCredential(), config.ChannelName, config.CommandSymbol.ToCharArray()[0], config.CommandSymbol.ToCharArray()[0], true);
                 TwitchClient.OnLog += Client_OnLog;
                 TwitchClient.OnJoinedChannel += Client_OnJoinedChannel;
                 TwitchClient.OnMessageReceived += Client_OnMessageReceived;
@@ -145,6 +144,7 @@ namespace ViewerGameWorker
         }
         private void Client_OnMessageReceived(object sender, OnMessageReceivedArgs e)
         {
+
             if (!e.ChatMessage.Message.StartsWith(config.CommandSymbol)) //message is not a command
             {
                 CountMsg++;

@@ -16,7 +16,7 @@ namespace ViewerGameWorker
 
         public string CommandSymbol { get; set; } = "#";
         public string BotName { get; set; } = "";
-
+        public string DbString { get; set; } = "Data Source=SERVER;Initial Catalog=DATABASE;Integrated Security=False;user id=USER;password=PASSWORD";
         public ConnectionCredentials GetCredential()
         {
             return new ConnectionCredentials(ChannelName, AccessToken);
