@@ -3,6 +3,9 @@ using System.Data.Entity.ModelConfiguration.Conventions;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Collections;
 
 namespace StreamerGame
 {
@@ -23,14 +26,27 @@ namespace StreamerGame
         }
     }
 
+    public class ObservableListSource<T> : ObservableCollection<T>, IListSource
+            where T : class
+    {
+        private IBindingList _bindingList;
+
+        bool IListSource.ContainsListCollection { get { return false; } }
+
+        IList IListSource.GetList()
+        {
+            return _bindingList ??= this.ToBindingList();
+        }
+    }
+
     public class Viewer
     {
         public int ID { get; set; }
         public string UserName { get; set; } //This should be the miror value of Twitch name
         public string UserId { get; set; } //This should be the miror value of Twitch name
         public string UserType { get; set; } //This should be the miror value of Twitch name
-        public virtual ICollection<BattleCard> OwnedBattleCard { get; set; }
-        public virtual ICollection<ActionCard> OwnedActionCard { get; set; }
+        public virtual ObservableListSource<BattleCard> OwnedBattleCard { get; set; }
+        public virtual ObservableListSource<ActionCard> OwnedActionCard { get; set; }
         public decimal Money { get; set; }
     }
     public class BattleCard // A game card 
@@ -43,6 +59,8 @@ namespace StreamerGame
         public object Picture { get; set; }
         public string Description { get; set; }
         public int Rarity { get; set; } //Higher the value is, rarest the card is.
+        public string Ability1 { get; set; } //Represent The Name of the Ability that refers to a Metho in the Discord Bot
+        public string Ability2 { get; set; } //Represent The Name of the Ability that refers to a Metho in the Discord Bot
     }
     public class ActionCard
     {
@@ -51,6 +69,8 @@ namespace StreamerGame
         public object Picture { get; set; }
         public string Description { get; set; }
         public int Rarity { get; set; } //Higher the value is, rarest the card is.
+        public string DiscordAbility { get; set; } //Represent The Name of the Ability that refers to a Metho in the Discord Bot
+        public string TwitchAbility { get; set; } //Represent The Name of the Ability that refers to a Metho in the Twitch Bot
     }
     
 
