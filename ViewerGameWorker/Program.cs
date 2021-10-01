@@ -1,10 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using CommandLine;
+
 
 namespace ViewerGameWorker
 {
@@ -12,7 +9,10 @@ namespace ViewerGameWorker
     {
         public static void Main(string[] args)
         {
-            try { CreateHostBuilder(args).Build().Run(); }
+            try 
+            {
+                CreateHostBuilder(args).Build().Run(); 
+            }
             catch(Exception e) { Console.WriteLine(e.Message); }
         }
 

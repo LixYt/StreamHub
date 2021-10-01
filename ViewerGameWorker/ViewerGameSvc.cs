@@ -12,6 +12,10 @@ using System.IO;
 using System.Text.Json;
 using TwitchLib.Client.Events;
 using TwitchLib.Client.Enums;
+using Microsoft.Extensions.Configuration;
+using System.Reflection;
+using System.Data.SqlClient;
+using System.Data.Entity.Core.EntityClient;
 
 namespace ViewerGameWorker
 {
@@ -22,7 +26,8 @@ namespace ViewerGameWorker
         private ViewerGameConfig config;
         private string channel;
         private int CountMsg = 0;
-
+        ViewerGameContext ctx;
+        
         public ViewerGameSvc(ILogger<ViewerGameSvc> logger)
         {
             _logger = logger;
@@ -31,6 +36,13 @@ namespace ViewerGameWorker
             {
                 Console.WriteLine("Config loaded");
                 Setup_Twitch();
+                try
+                {
+                    var connString = "Data Source=code-ex.fr;Initial Catalog=JarLix;Integrated Security=False;user id=bot;password=Azerty123+";
+                    ctx = new ViewerGameContext(connString);
+                }
+                catch(Exception ex) { _logger.LogError(ex.Message); }
+                
             }
             else
             {
@@ -43,6 +55,7 @@ namespace ViewerGameWorker
         public override void Dispose()
         {
             TwitchClient.Disconnect();
+            ctx.Database.Connection.Close();
             base.Dispose();
         }
 
@@ -88,6 +101,8 @@ namespace ViewerGameWorker
             }*/
         }
 
+        
+
         #region Twitch
         public void Setup_Twitch()
         {
@@ -105,6 +120,7 @@ namespace ViewerGameWorker
                 TwitchClient.OnUserJoined += Client_OnUserJoined;
                 TwitchClient.OnUserLeft += Client_OnUserLeft;
                 TwitchClient.Connect();
+                _logger.LogInformation("Twitch connection successfull");
             }
             catch (Exception e)
             {
@@ -116,7 +132,7 @@ namespace ViewerGameWorker
         }
         private void Client_OnLog(object sender, OnLogArgs e)
         {
-            _logger.LogInformation("Connected to twitch chat");
+            //_logger.LogInformation("Connected to twitch chat");
         }
         private void Client_OnConnected(object sender, OnConnectedArgs e)
         {
@@ -125,7 +141,7 @@ namespace ViewerGameWorker
         private void Client_OnJoinedChannel(object sender, OnJoinedChannelArgs e)
         {
             channel = e.Channel;
-            TwitchClient.SendMessage(channel, "joined");
+            TwitchClient.SendMessage(channel, $"{e.BotUsername} opérationnel");
         }
         private void Client_OnMessageReceived(object sender, OnMessageReceivedArgs e)
         {
