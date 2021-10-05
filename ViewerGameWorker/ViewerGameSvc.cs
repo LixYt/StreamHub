@@ -6,16 +6,12 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using TwitchLib.Client;
-using TwitchLib.Communication.Clients;
-using TwitchLib.Communication.Models;
 using System.IO;
 using System.Text.Json;
 using TwitchLib.Client.Events;
-using TwitchLib.Client.Enums;
-using Microsoft.Extensions.Configuration;
-using System.Reflection;
-using System.Data.SqlClient;
-using System.Data.Entity.Core.EntityClient;
+using TwitchLib.PubSub;
+using TwitchLib.Api.V5.Models.Channels;
+using TwitchLib.Api;
 
 namespace ViewerGameWorker
 {
@@ -25,8 +21,14 @@ namespace ViewerGameWorker
         private TwitchClient TwitchClient;
         private ViewerGameConfig config;
         private string channel;
+        private string channel_id;
         ViewerGameContext ctx;
         private List<ViewerLive> ChattingViewers;
+        private TwitchPubSub clientPubSub;
+        private TwitchAPI api;
+        private ChannelAuthed Chan;
+
+        public bool isLiveOn = false;
 
         public ViewerGameSvc(ILogger<ViewerGameSvc> logger)
         {
@@ -43,7 +45,8 @@ namespace ViewerGameWorker
                 }
                 catch(Exception ex) { _logger.LogError(ex.Message); }
 
-                Twitch_setup();
+                TwitchClient_setup();
+                _ = TwitchAPIandPubSub_setup();
             }
             else
             {
@@ -111,7 +114,7 @@ namespace ViewerGameWorker
         
 
         #region Twitch
-        public void Twitch_setup()
+        public void TwitchClient_setup()
         {
             #region Twitch
             try
@@ -130,7 +133,7 @@ namespace ViewerGameWorker
                 TwitchClient.OnRaidNotification += TwitchClient_OnRaidNotification;
                 TwitchClient.OnChatCommandReceived += TwitchClient_OnChatCommandReceived;
                 TwitchClient.Connect();
-
+                
                 _logger.LogInformation("Twitch connection successfull");
             }
             catch (Exception e)
@@ -140,6 +143,60 @@ namespace ViewerGameWorker
                 Dispose();
             }
             #endregion
+        }
+        public async Task TwitchAPIandPubSub_setup()
+        {
+            try
+            {
+                clientPubSub = new TwitchPubSub();
+                api = new TwitchAPI();
+                api.Settings.ClientId = config.ClientID;
+                api.Settings.AccessToken = config.AccessToken;
+
+                var respons = await api.Helix.Users.GetUsersAsync(null, new List<string>() { config.ChannelName });
+                channel_id = respons.Users[0].Id;
+
+                clientPubSub.OnPubSubServiceConnected += ClientPubSub_OnPubSubServiceConnected;
+                clientPubSub.OnRewardRedeemed += ClientPubSub_OnRewardRedeemed;
+                clientPubSub.OnStreamUp += ClientPubSub_OnStreamUp;
+                clientPubSub.OnStreamDown += ClientPubSub_OnStreamDown;
+
+                clientPubSub.ListenToBitsEvents(channel_id);
+                clientPubSub.ListenToRewards(channel_id);
+                
+                
+                clientPubSub.Connect();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+                Console.WriteLine(e.Message);
+                Dispose();
+            }
+            
+            
+        }
+
+        private void ClientPubSub_OnStreamDown(object sender, TwitchLib.PubSub.Events.OnStreamDownArgs e)
+        {
+            isLiveOn = false;
+            TwitchClient.SendMessage(channel, $"{config.GameTitle} est maintenant désactivé");
+        }
+
+        private void ClientPubSub_OnStreamUp(object sender, TwitchLib.PubSub.Events.OnStreamUpArgs e)
+        {
+            isLiveOn = true;
+            TwitchClient.SendMessage(channel, $"{config.GameTitle} est maintenant actif");
+        }
+
+        private void ClientPubSub_OnPubSubServiceConnected(object sender, EventArgs e)
+        {
+            _logger.LogInformation("PubSub connected");
+        }
+
+        private void ClientPubSub_OnRewardRedeemed(object sender, TwitchLib.PubSub.Events.OnRewardRedeemedArgs e)
+        {
+            _logger.LogInformation(e.RewardTitle);
         }
 
         private void TwitchClient_OnReSubscriber(object sender, OnReSubscriberArgs e)
