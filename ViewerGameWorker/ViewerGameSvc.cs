@@ -160,10 +160,9 @@ namespace ViewerGameWorker
                 clientPubSub.OnRewardRedeemed += ClientPubSub_OnRewardRedeemed;
                 clientPubSub.OnStreamUp += ClientPubSub_OnStreamUp;
                 clientPubSub.OnStreamDown += ClientPubSub_OnStreamDown;
-
+                                
                 clientPubSub.ListenToBitsEvents(channel_id);
                 clientPubSub.ListenToRewards(channel_id);
-                
                 
                 clientPubSub.Connect();
             }
@@ -191,7 +190,8 @@ namespace ViewerGameWorker
 
         private void ClientPubSub_OnPubSubServiceConnected(object sender, EventArgs e)
         {
-            _logger.LogInformation("PubSub connected");
+            clientPubSub.SendTopics();
+            _logger.LogInformation("PubSub connected");            
         }
 
         private void ClientPubSub_OnRewardRedeemed(object sender, TwitchLib.PubSub.Events.OnRewardRedeemedArgs e)
