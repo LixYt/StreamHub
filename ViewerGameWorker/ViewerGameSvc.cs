@@ -111,16 +111,13 @@ namespace ViewerGameWorker
             }*/
         }
 
-        
-
-        #region Twitch
         public void TwitchClient_setup()
         {
             #region Twitch
             try
             {
                 TwitchClient = new TwitchClient();
-                TwitchClient.Initialize(config.GetCredential(), config.ChannelName, config.CommandSymbol.ToCharArray()[0], config.CommandSymbol.ToCharArray()[0], true);
+                TwitchClient.Initialize(config.GetBotCredential(), config.ChannelName, config.CommandSymbol.ToCharArray()[0], config.CommandSymbol.ToCharArray()[0], true);
                 TwitchClient.OnLog += Client_OnLog;
                 TwitchClient.OnJoinedChannel += Client_OnJoinedChannel;
                 TwitchClient.OnMessageReceived += Client_OnMessageReceived;
@@ -133,7 +130,7 @@ namespace ViewerGameWorker
                 TwitchClient.OnRaidNotification += TwitchClient_OnRaidNotification;
                 TwitchClient.OnChatCommandReceived += TwitchClient_OnChatCommandReceived;
                 TwitchClient.Connect();
-                
+
                 _logger.LogInformation("Twitch connection successfull");
             }
             catch (Exception e)
@@ -150,20 +147,21 @@ namespace ViewerGameWorker
             {
                 clientPubSub = new TwitchPubSub();
                 api = new TwitchAPI();
-                api.Settings.ClientId = config.ClientID;
-                api.Settings.AccessToken = config.AccessToken;
+                api.Settings.ClientId = config.BroadCaster_ClientID;
+                api.Settings.AccessToken = config.BroadCaster_AccessToken;
 
                 var respons = await api.Helix.Users.GetUsersAsync(null, new List<string>() { config.ChannelName });
                 channel_id = respons.Users[0].Id;
 
                 clientPubSub.OnPubSubServiceConnected += ClientPubSub_OnPubSubServiceConnected;
-                clientPubSub.OnRewardRedeemed += ClientPubSub_OnRewardRedeemed;
+                clientPubSub.OnChannelPointsRewardRedeemed += ClientPubSub_OnChannelPointsRewardRedeemed;
                 clientPubSub.OnStreamUp += ClientPubSub_OnStreamUp;
                 clientPubSub.OnStreamDown += ClientPubSub_OnStreamDown;
-                                
-                clientPubSub.ListenToBitsEvents(channel_id);
-                clientPubSub.ListenToRewards(channel_id);
-                
+                clientPubSub.OnListenResponse += ClientPubSub_OnListenResponse;
+
+                clientPubSub.ListenToBitsEventsV2(channel_id);
+                clientPubSub.ListenToChannelPoints(channel_id);
+
                 clientPubSub.Connect();
             }
             catch (Exception e)
@@ -172,81 +170,42 @@ namespace ViewerGameWorker
                 Console.WriteLine(e.Message);
                 Dispose();
             }
-            
-            
+
+
         }
 
+
+        #region PubSub Event
+        private void ClientPubSub_OnChannelPointsRewardRedeemed(object sender, TwitchLib.PubSub.Events.OnChannelPointsRewardRedeemedArgs e)
+        {
+            RegisterTwitchUser(e.RewardRedeemed.Redemption.User.DisplayName, e.RewardRedeemed.Redemption.User.Id);
+            int points = e.RewardRedeemed.Redemption.Reward.Cost / 100;
+            RewardTwitchUser(e.RewardRedeemed.Redemption.User.DisplayName,
+                points, $"redeeming channel points reward '{e.RewardRedeemed.Redemption.Reward.Title}'");
+        }
+        private void ClientPubSub_OnListenResponse(object sender, TwitchLib.PubSub.Events.OnListenResponseArgs e)
+        {
+            _logger.LogInformation($"Succes = {e.Successful}, Topic = {e.Topic} , Error = {e.Response.Error}");
+        }
         private void ClientPubSub_OnStreamDown(object sender, TwitchLib.PubSub.Events.OnStreamDownArgs e)
         {
             isLiveOn = false;
             TwitchClient.SendMessage(channel, $"{config.GameTitle} est maintenant désactivé");
+            // fermer toutes les sessions ChattingViewers en cours quand le live se coupe !!!
         }
-
         private void ClientPubSub_OnStreamUp(object sender, TwitchLib.PubSub.Events.OnStreamUpArgs e)
         {
             isLiveOn = true;
             TwitchClient.SendMessage(channel, $"{config.GameTitle} est maintenant actif");
         }
-
         private void ClientPubSub_OnPubSubServiceConnected(object sender, EventArgs e)
         {
-            clientPubSub.SendTopics();
-            _logger.LogInformation("PubSub connected");            
+            clientPubSub.SendTopics(config.BroadCaster_AccessToken);
+            _logger.LogInformation("PubSub connected");
         }
+        #endregion
 
-        private void ClientPubSub_OnRewardRedeemed(object sender, TwitchLib.PubSub.Events.OnRewardRedeemedArgs e)
-        {
-            _logger.LogInformation(e.RewardTitle);
-        }
-
-        private void TwitchClient_OnReSubscriber(object sender, OnReSubscriberArgs e)
-        {
-            RegisterTwitchUser(e.ReSubscriber.DisplayName.ToLower());
-            RewardTwitchUser(e.ReSubscriber.DisplayName.ToLower(), 20);
-        }
-
-        private void TwitchClient_OnRaidNotification(object sender, OnRaidNotificationArgs e)
-        {
-            RegisterTwitchUser(e.RaidNotification.DisplayName.ToLower());
-            RewardTwitchUser(e.RaidNotification.DisplayName.ToLower(), 20);
-        }
-
-        private void TwitchClient_OnChatCommandReceived(object sender, OnChatCommandReceivedArgs e)
-        {
-            switch (e.Command.CommandText.ToLower())
-            {
-                case "score":
-                    TwitchClient.SendMessage(channel, $"{e.Command.ChatMessage.Username} tu as {ctx.Viewers.Where(x => x.UserName == e.Command.ChatMessage.Username).First().Points} points.");
-                    break;
-
-                case "linkdiscord":
-                    ctx.Viewers.Where(x => x.UserName == e.Command.ChatMessage.Username).First().DiscordTag = e.Command.ArgumentsAsString;
-                    ctx.SaveChanges();
-                    break;
-
-                case "drawcard": //Action Card
-                    int.TryParse(e.Command.ArgumentsAsString, out int usedPointsA);
-                    if (usedPointsA == 0) 
-                    { TwitchClient.SendMessage(channel, $"{e.Command.ChatMessage.Username}, tu dois indiquer le nombre de points à dépenser !"); }
-                    else if (usedPointsA < ctx.Viewers.Where(x => x.UserName == e.Command.ChatMessage.Username).First().Points)
-                    { TwitchClient.SendMessage(channel, $"{e.Command.ChatMessage.Username}, tu n'as pas assez {usedPointsA} points sur ton compte !"); }
-                    else
-                    {
-
-                    }
-                    break;
-
-                case "echange":
-                    List<string> args = e.Command.ArgumentsAsList;
-
-                    break;
-
-                default:
-                    TwitchClient.SendMessage(channel, $"La commande {e.Command.CommandText} n'existe pas.");
-                    break;
-            }
-        }
-
+        #region TwitchClient Events
         private void Client_OnLog(object sender, OnLogArgs e)
         {
             //_logger.LogInformation("Connected to twitch chat");
@@ -258,7 +217,7 @@ namespace ViewerGameWorker
         private void Client_OnJoinedChannel(object sender, OnJoinedChannelArgs e)
         {
             channel = e.Channel;
-            TwitchClient.SendMessage(channel, $"{e.BotUsername} opérationnel");
+            TwitchClient.SendMessage(channel, $"Jeu des viewers opérationnel");
         }
         private void Client_OnMessageReceived(object sender, OnMessageReceivedArgs e)
         {
@@ -269,7 +228,7 @@ namespace ViewerGameWorker
                 int points = (int)Math.Ceiling((decimal)e.ChatMessage.Message.Trim().Length / 20);
                 if (e.ChatMessage.IsSubscriber) points *= 2;
 
-                RewardTwitchUser(e.ChatMessage.Username, points);
+                RewardTwitchUser(e.ChatMessage.Username, points, "chating");
             }
         }
         private void Client_OnWhisperReceived(object sender, OnWhisperReceivedArgs e)
@@ -295,10 +254,57 @@ namespace ViewerGameWorker
             v.Disconnected = DateTime.Now;
             TimeSpan t = ((TimeSpan)(v.Disconnected - v.Connected));
             RewardTwitchUser(v.UserName, (int)t.TotalMinutes/2);
+            _logger.LogInformation($"{v.UserName} earn {(int)t.TotalMinutes / 2} while being on the stream");
+        }
+        private void TwitchClient_OnReSubscriber(object sender, OnReSubscriberArgs e)
+        {
+            RegisterTwitchUser(e.ReSubscriber.DisplayName.ToLower());
+            RewardTwitchUser(e.ReSubscriber.DisplayName.ToLower(), 20);
+        }
+        private void TwitchClient_OnRaidNotification(object sender, OnRaidNotificationArgs e)
+        {
+            RegisterTwitchUser(e.RaidNotification.DisplayName.ToLower());
+            RewardTwitchUser(e.RaidNotification.DisplayName.ToLower(), 20);
+        }
+        private void TwitchClient_OnChatCommandReceived(object sender, OnChatCommandReceivedArgs e)
+        {
+            switch (e.Command.CommandText.ToLower())
+            {
+                case "score":
+                    TwitchClient.SendMessage(channel, $"{e.Command.ChatMessage.Username} tu as {ctx.Viewers.Where(x => x.UserName == e.Command.ChatMessage.Username).First().Points} points.");
+                    break;
+
+                case "linkdiscord":
+                    ctx.Viewers.Where(x => x.UserName == e.Command.ChatMessage.Username).First().DiscordTag = e.Command.ArgumentsAsString;
+                    ctx.SaveChanges();
+                    break;
+
+                case "drawcard": //Action Card
+                    int.TryParse(e.Command.ArgumentsAsString, out int usedPointsA);
+                    if (usedPointsA == 0)
+                    { TwitchClient.SendMessage(channel, $"{e.Command.ChatMessage.Username}, tu dois indiquer le nombre de points à dépenser !"); }
+                    else if (usedPointsA < ctx.Viewers.Where(x => x.UserName == e.Command.ChatMessage.Username).First().Points)
+                    { TwitchClient.SendMessage(channel, $"{e.Command.ChatMessage.Username}, tu n'as pas assez {usedPointsA} points sur ton compte !"); }
+                    else
+                    {
+                        { TwitchClient.SendMessage(channel, $"{e.Command.ChatMessage.Username}, cette fonction n'est pas encore prête"); }
+                    }
+                    break;
+
+                case "echange":
+                    List<string> args = e.Command.ArgumentsAsList;
+                    TwitchClient.SendMessage(channel, $"{e.Command.ChatMessage.Username}, cette fonction n'est pas encore prête");
+                    break;
+
+                default:
+                    TwitchClient.SendMessage(channel, $"La commande {e.Command.CommandText} n'existe pas.");
+                    break;
+            }
         }
         #endregion
-    
-        public void RegisterTwitchUser(string UserName, string UserId="")
+
+        #region Twitch to Database Methods
+        public void RegisterTwitchUser(string UserName, string UserId = "")
         {
             if (ctx.Viewers.Where(x => x.UserName == UserName).Count() == 0)
             {
@@ -320,18 +326,20 @@ namespace ViewerGameWorker
                 ctx.SaveChanges();
             }
 
-            
+
         }
-        
-        public void RewardTwitchUser(string UserName, int points)
+        public void RewardTwitchUser(string UserName, int points, string message = "")
         {
             ctx.Viewers.Where(x => x.UserName == UserName).First().Points += points;
             ctx.SaveChanges();
+            _logger.LogInformation($"{UserName} wins {points}, rewarded for : {(message == "" ? "" : message)}");
         }
         public void DrawCard(string UserName, int usedPoints)
         {
 
         }
-            
+        #endregion
+
+
     }
 }
