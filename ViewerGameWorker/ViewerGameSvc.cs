@@ -58,6 +58,11 @@ namespace ViewerGameWorker
         }
         public override void Dispose()
         {
+            foreach(ViewerLive v in ChattingViewers)
+            {
+                ViewerLiveToDatabase(v.UserName);
+            }
+
             TwitchClient.Disconnect();
             ctx.Database.Connection.Close();
             base.Dispose();
@@ -155,12 +160,14 @@ namespace ViewerGameWorker
 
                 clientPubSub.OnPubSubServiceConnected += ClientPubSub_OnPubSubServiceConnected;
                 clientPubSub.OnChannelPointsRewardRedeemed += ClientPubSub_OnChannelPointsRewardRedeemed;
+                clientPubSub.OnBitsReceivedV2 += ClientPubSub_OnBitsReceivedV2;
                 clientPubSub.OnStreamUp += ClientPubSub_OnStreamUp;
                 clientPubSub.OnStreamDown += ClientPubSub_OnStreamDown;
                 clientPubSub.OnListenResponse += ClientPubSub_OnListenResponse;
 
                 clientPubSub.ListenToBitsEventsV2(channel_id);
                 clientPubSub.ListenToChannelPoints(channel_id);
+                clientPubSub.ListenToVideoPlayback(channel_id);
 
                 clientPubSub.Connect();
             }
@@ -174,6 +181,8 @@ namespace ViewerGameWorker
 
         }
 
+        
+
 
         #region PubSub Event
         private void ClientPubSub_OnChannelPointsRewardRedeemed(object sender, TwitchLib.PubSub.Events.OnChannelPointsRewardRedeemedArgs e)
@@ -182,6 +191,12 @@ namespace ViewerGameWorker
             int points = e.RewardRedeemed.Redemption.Reward.Cost / 100;
             RewardTwitchUser(e.RewardRedeemed.Redemption.User.DisplayName,
                 points, $"redeeming channel points reward '{e.RewardRedeemed.Redemption.Reward.Title}'");
+        }
+        private void ClientPubSub_OnBitsReceivedV2(object sender, TwitchLib.PubSub.Events.OnBitsReceivedV2Args e)
+        {
+            RegisterTwitchUser(e.UserName, e.UserId);
+            int points = e.TotalBitsUsed / 10;
+            RewardTwitchUser(e.UserName, points, $"Cheers {e.TotalBitsUsed}");
         }
         private void ClientPubSub_OnListenResponse(object sender, TwitchLib.PubSub.Events.OnListenResponseArgs e)
         {
@@ -250,21 +265,17 @@ namespace ViewerGameWorker
         }
         private void Client_OnUserLeft(object sender, OnUserLeftArgs e)
         {
-            ViewerLive v = ChattingViewers.FindLast(x => x.UserName == e.Username && x.Disconnected == null);
-            v.Disconnected = DateTime.Now;
-            TimeSpan t = ((TimeSpan)(v.Disconnected - v.Connected));
-            RewardTwitchUser(v.UserName, (int)t.TotalMinutes/2);
-            _logger.LogInformation($"{v.UserName} earn {(int)t.TotalMinutes / 2} while being on the stream");
+            ViewerLiveToDatabase(e.Username);
         }
         private void TwitchClient_OnReSubscriber(object sender, OnReSubscriberArgs e)
         {
             RegisterTwitchUser(e.ReSubscriber.DisplayName.ToLower());
-            RewardTwitchUser(e.ReSubscriber.DisplayName.ToLower(), 20);
+            RewardTwitchUser(e.ReSubscriber.DisplayName.ToLower(), 20, "Subscribing to this channel");
         }
         private void TwitchClient_OnRaidNotification(object sender, OnRaidNotificationArgs e)
         {
             RegisterTwitchUser(e.RaidNotification.DisplayName.ToLower());
-            RewardTwitchUser(e.RaidNotification.DisplayName.ToLower(), 20);
+            RewardTwitchUser(e.RaidNotification.DisplayName.ToLower(), 20, "Raiding this channel");
         }
         private void TwitchClient_OnChatCommandReceived(object sender, OnChatCommandReceivedArgs e)
         {
@@ -279,15 +290,16 @@ namespace ViewerGameWorker
                     ctx.SaveChanges();
                     break;
 
-                case "drawcard": //Action Card
+                case "drawcard": 
                     int.TryParse(e.Command.ArgumentsAsString, out int usedPointsA);
                     if (usedPointsA == 0)
-                    { TwitchClient.SendMessage(channel, $"{e.Command.ChatMessage.Username}, tu dois indiquer le nombre de points à dépenser !"); }
-                    else if (usedPointsA < ctx.Viewers.Where(x => x.UserName == e.Command.ChatMessage.Username).First().Points)
+                    { TwitchClient.SendMessage(channel, $"{e.Command.ChatMessage.Username}, il faut dépenser au moins 1 points (2500 points max seront utilisés) !"); }
+                    else if (usedPointsA > ctx.Viewers.Where(x => x.UserName == e.Command.ChatMessage.Username).First().Points)
                     { TwitchClient.SendMessage(channel, $"{e.Command.ChatMessage.Username}, tu n'as pas assez {usedPointsA} points sur ton compte !"); }
                     else
                     {
                         { TwitchClient.SendMessage(channel, $"{e.Command.ChatMessage.Username}, cette fonction n'est pas encore prête"); }
+                        DrawCard(e.Command.ChatMessage.Username, usedPointsA);
                     }
                     break;
 
@@ -304,6 +316,15 @@ namespace ViewerGameWorker
         #endregion
 
         #region Twitch to Database Methods
+        public void ViewerLiveToDatabase(string UserName)
+        {
+            if (!isLiveOn) { _logger.LogInformation($"This channel is offline ({UserName}, being connected to IRC)"); return; }
+            ViewerLive v = ChattingViewers.FindLast(x => x.UserName == UserName && x.Disconnected == null);
+            v.Disconnected = DateTime.Now;
+            TimeSpan t = ((TimeSpan)(v.Disconnected - v.Connected));
+            RewardTwitchUser(v.UserName, (int)t.TotalMinutes / 2, "Spending time in here");
+            _logger.LogInformation($"{v.UserName} earn {(int)t.TotalMinutes / 2} while being on the stream");
+        }
         public void RegisterTwitchUser(string UserName, string UserId = "")
         {
             if (ctx.Viewers.Where(x => x.UserName == UserName).Count() == 0)
@@ -330,12 +351,85 @@ namespace ViewerGameWorker
         }
         public void RewardTwitchUser(string UserName, int points, string message = "")
         {
+            if (!isLiveOn) { _logger.LogInformation($"This channel is offline ({UserName}, {message})"); return; }
             ctx.Viewers.Where(x => x.UserName == UserName).First().Points += points;
             ctx.SaveChanges();
             _logger.LogInformation($"{UserName} wins {points}, rewarded for : {(message == "" ? "" : message)}");
         }
-        public void DrawCard(string UserName, int usedPoints)
+        public void DrawCard(string UserName, int usedPoints) //100 pts = 1% de plus de chance, limité à 25% max
         {
+            try 
+            {
+                List<Card> Cards = new List<Card>();
+                foreach(ActionCard a in ctx.ActionCards)
+                {
+                    Cards.Add(a.ToCard());
+                }
+                foreach (BattleCard b in ctx.BattleCards)
+                {
+                    Cards.Add(b.ToCard());
+                }                
+
+                List<Card> OrderedCards = Cards.OrderBy(c => c.Rarity).ToList();
+
+                if (OrderedCards.Count() == 0) { _logger.LogInformation("Cards are not set yet !"); return; }
+                //Rarity = 1 => 50%; Rarity = 2 => 25%; Rarity = 3 => 15%; Rarity = 4 => 9%; Rarity = 5 => 1%
+
+                int Choice = new Random().Next(1, 100);
+                if (usedPoints > 0)
+                {
+                    int AddPoints = usedPoints / 100;
+                    if (AddPoints > 25) { usedPoints = 2500; AddPoints = 25; }
+                    Choice += AddPoints;
+                }
+
+                List<Card> CarteTirable;
+                if (Choice <= 50)
+                {
+                    CarteTirable = OrderedCards.Where(x => x.Rarity == 1).ToList();
+                }
+                else if (Choice > 50 && Choice <= 75)
+                {
+                    CarteTirable = OrderedCards.Where(x => x.Rarity == 2).ToList();
+                }
+                else if (Choice > 75 && Choice <= 90)
+                {
+                    CarteTirable = OrderedCards.Where(x => x.Rarity == 3).ToList();
+                }
+                else if (Choice > 91 && Choice <= 99)
+                {
+                    CarteTirable = OrderedCards.Where(x => x.Rarity == 4).ToList();
+                }
+                else
+                {
+                    CarteTirable = OrderedCards.Where(x => x.Rarity == 5).ToList();
+                }
+
+                int ChoosenIndexCard = new Random().Next(1, CarteTirable.Count());
+                Card ChoosenCard = CarteTirable[ChoosenIndexCard];
+
+                Viewer v = ctx.Viewers.Where(x => x.UserName == UserName).First();
+                v.Points -= usedPoints;
+                if (ctx.ActionCards.Where(x => x.CardName == ChoosenCard.CardName).Count() == 1)
+                {
+                    v.OwnedActionCard.Add(ctx.ActionCards.Where(x => x.CardName == ChoosenCard.CardName).First());
+                }
+                else if (ctx.BattleCards.Where(x => x.CardName == ChoosenCard.CardName).Count() == 1)
+                {
+                    v.OwnedBattleCard.Add(ctx.BattleCards.Where(x => x.CardName == ChoosenCard.CardName).First());
+                }
+                else
+                {
+                    _logger.LogError($"Failed to retrieve the card {ChoosenCard.CardName}");
+                }
+
+                ctx.SaveChanges();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+            }
+            
 
         }
         #endregion

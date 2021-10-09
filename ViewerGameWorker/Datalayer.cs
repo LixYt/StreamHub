@@ -34,27 +34,37 @@ namespace ViewerGameWorker
         public int Points { get; set; } //Viewer gain points by sending messages (porportional to median long message of 12 chars), and misc event of twitch IRC API
 
     }
-    public class BattleCard // A game card 
+    public class Card
     {
         public int ID { get; set; }
         public string CardName { get; set; }
+        public int Rarity { get; set; } //1 => Basique, 2 => Commun, 3 => Rare, 4 => Epique, 5 => Legendaire
+
+    }
+
+    public class BattleCard : Card// A game card 
+    {
         public int Life { get; set; }
         public int Attaque { get; set; }
         public int Defense { get; set; }
         public object Picture { get; set; }
         public string Description { get; set; }
-        public int Rarity { get; set; } //Higher the value is, rarest the card is. (it's divider of a fraction 1/rarity). Rarity > 1 !!!!
         public string Ability1 { get; set; } //Represent The Name of the Ability that refers to a Metho in the Game algo
         public string Ability2 { get; set; } //Represent The Name of the Ability that refers to a Metho in the Game algo
+        public Card ToCard()
+        {
+            return new Card() { ID = this.ID, CardName = this.CardName, Rarity = this.Rarity };
+        }
     }
-    public class ActionCard
+    public class ActionCard : Card
     {
-        public int ID { get; set; }
-        public string CardName { get; set; }
         public object Picture { get; set; }
         public string Description { get; set; }
-        public int Rarity { get; set; } //Higher the value is, rarest the card is.
         public string DiscordAbility { get; set; } //Represent The Name of the Ability that refers to a Metho in the Discord Bot
         public string TwitchAbility { get; set; } //Represent The Name of the Ability that refers to a Metho in the Twitch Bot
+        public Card ToCard()
+        {
+            return new Card() { ID = this.ID, CardName = this.CardName, Rarity = this.Rarity };
+        }
     }
 }
