@@ -26,8 +26,6 @@ namespace ViewerGameWorker
         private List<ViewerLive> ChattingViewers;
         private TwitchPubSub clientPubSub;
         private TwitchAPI api;
-        private ChannelAuthed Chan;
-
         public bool isLiveOn = false;
 
         public ViewerGameSvc(ILogger<ViewerGameSvc> logger)
@@ -47,6 +45,9 @@ namespace ViewerGameWorker
 
                 TwitchClient_setup();
                 _ = TwitchAPIandPubSub_setup();
+                _ = UpdateLiveStatus();
+                
+                
             }
             else
             {
@@ -56,6 +57,13 @@ namespace ViewerGameWorker
 
             
         }
+        public async Task UpdateLiveStatus()
+        {
+            var r2 = await api.Helix.Streams.GetStreamsAsync(null, null, 1, null, null, "all", null, new List<string>() { config.ChannelName });
+            isLiveOn = (r2.Streams[0] != null ? true : false);
+        }
+
+
         public override void Dispose()
         {
             foreach(ViewerLive v in ChattingViewers)
@@ -105,13 +113,6 @@ namespace ViewerGameWorker
         {
             /*while (!stoppingToken.IsCancellationRequested)
             {
-                if (ctx.Database.Connection.State == System.Data.ConnectionState.Open && TwitchClient.IsConnected)
-                {
-                    foreach (Viewer v in ctx.Viewers.Where(x => x.Points >= 1))
-                    {
-                        _logger.LogInformation($"{v.UserName} has {v.Points}");
-                    }
-                }
                 await Task.Delay(1000, stoppingToken);
             }*/
         }
@@ -154,7 +155,7 @@ namespace ViewerGameWorker
                 api = new TwitchAPI();
                 api.Settings.ClientId = config.BroadCaster_ClientID;
                 api.Settings.AccessToken = config.BroadCaster_AccessToken;
-
+                
                 var respons = await api.Helix.Users.GetUsersAsync(null, new List<string>() { config.ChannelName });
                 channel_id = respons.Users[0].Id;
 
@@ -170,6 +171,7 @@ namespace ViewerGameWorker
                 clientPubSub.ListenToVideoPlayback(channel_id);
 
                 clientPubSub.Connect();
+
             }
             catch (Exception e)
             {
