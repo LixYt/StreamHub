@@ -76,7 +76,6 @@ namespace StreamHub
                 clientPubSub.OnPrediction += OnPubSubPrediction;
                 clientPubSub.OnListenResponse += onListenResponse;
 
-
                 clientPubSub.ListenToPredictions(Chan.Id);
                 clientPubSub.Connect();
 

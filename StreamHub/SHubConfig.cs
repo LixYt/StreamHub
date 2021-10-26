@@ -35,6 +35,8 @@ namespace StreamHub
         public string Overlay_monitor = "";
         public int Overlay_FontSize = 20;
 
+        public List<RoleVote> RoleVotes = new List<RoleVote>();
+
         public string Twitch_ClientID = "";
         public SHubConfig()
         {
@@ -68,17 +70,26 @@ namespace StreamHub
 
         public string FormatteCommand(string Symbol) { return Symbol + command; }
 
-        private string nameValue;
-        private string commandValue;
-        private int nbrValue;
+        protected string nameValue;
+        protected string commandValue;
+        protected int nbrValue;
 
-        private void NotifyPropertyChanged([CallerMemberName] String propertyName = "")
+        protected void NotifyPropertyChanged([CallerMemberName] String propertyName = "")
         {
             if (PropertyChanged != null)
             {
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
+    }
+
+    [Serializable]
+    public class RoleVote : Role
+    {
+        public string UserNames { get { return UserNamesValue; } set { UserNamesValue = value; NotifyPropertyChanged(); } }
+        protected string UserNamesValue = "";
+
+        public string FormattedCommandDont(string Symbol) { return Symbol + "Dont" + command; }
     }
 
     [Serializable]

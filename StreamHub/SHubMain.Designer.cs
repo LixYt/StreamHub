@@ -44,6 +44,9 @@ namespace StreamHub
             this.tab_ViewerPool = new System.Windows.Forms.TabPage();
             this.tab_GTA = new System.Windows.Forms.TabPage();
             this.c_nbr = new System.Windows.Forms.Label();
+            this.tab_RoleVoter = new System.Windows.Forms.TabPage();
+            this.c_VotesRoles = new System.Windows.Forms.DataGridView();
+            this.c_StartStopVotes = new System.Windows.Forms.Button();
             this.tab_Data = new System.Windows.Forms.TabPage();
             this.c_ConnectedUsers = new System.Windows.Forms.DataGridView();
             this.c_VisualMode = new System.Windows.Forms.Button();
@@ -52,6 +55,8 @@ namespace StreamHub
             this.c_features.SuspendLayout();
             this.tab_ViewerPool.SuspendLayout();
             this.tab_GTA.SuspendLayout();
+            this.tab_RoleVoter.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.c_VotesRoles)).BeginInit();
             this.tab_Data.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.c_ConnectedUsers)).BeginInit();
             this.SuspendLayout();
@@ -59,7 +64,7 @@ namespace StreamHub
             // C_ConfigForm
             // 
             this.C_ConfigForm.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.C_ConfigForm.Location = new System.Drawing.Point(545, 5);
+            this.C_ConfigForm.Location = new System.Drawing.Point(671, 5);
             this.C_ConfigForm.Name = "C_ConfigForm";
             this.C_ConfigForm.Size = new System.Drawing.Size(75, 23);
             this.C_ConfigForm.TabIndex = 0;
@@ -97,7 +102,7 @@ namespace StreamHub
             this.c_ViewerPool.ItemHeight = 15;
             this.c_ViewerPool.Location = new System.Drawing.Point(3, 51);
             this.c_ViewerPool.Name = "c_ViewerPool";
-            this.c_ViewerPool.Size = new System.Drawing.Size(614, 364);
+            this.c_ViewerPool.Size = new System.Drawing.Size(740, 364);
             this.c_ViewerPool.TabIndex = 7;
             // 
             // c_viewerpool_startstop
@@ -141,7 +146,7 @@ namespace StreamHub
             this.c_GTAPool.Location = new System.Drawing.Point(3, 37);
             this.c_GTAPool.Name = "c_GTAPool";
             this.c_GTAPool.RowTemplate.Height = 25;
-            this.c_GTAPool.Size = new System.Drawing.Size(614, 378);
+            this.c_GTAPool.Size = new System.Drawing.Size(740, 378);
             this.c_GTAPool.TabIndex = 12;
             // 
             // c_GTA_Auto
@@ -182,11 +187,12 @@ namespace StreamHub
             | System.Windows.Forms.AnchorStyles.Right)));
             this.c_features.Controls.Add(this.tab_ViewerPool);
             this.c_features.Controls.Add(this.tab_GTA);
+            this.c_features.Controls.Add(this.tab_RoleVoter);
             this.c_features.Controls.Add(this.tab_Data);
             this.c_features.Location = new System.Drawing.Point(0, 12);
             this.c_features.Name = "c_features";
             this.c_features.SelectedIndex = 0;
-            this.c_features.Size = new System.Drawing.Size(628, 446);
+            this.c_features.Size = new System.Drawing.Size(754, 446);
             this.c_features.TabIndex = 7;
             // 
             // tab_ViewerPool
@@ -198,7 +204,7 @@ namespace StreamHub
             this.tab_ViewerPool.Location = new System.Drawing.Point(4, 24);
             this.tab_ViewerPool.Name = "tab_ViewerPool";
             this.tab_ViewerPool.Padding = new System.Windows.Forms.Padding(3);
-            this.tab_ViewerPool.Size = new System.Drawing.Size(620, 418);
+            this.tab_ViewerPool.Size = new System.Drawing.Size(746, 418);
             this.tab_ViewerPool.TabIndex = 0;
             this.tab_ViewerPool.Text = "ViewerPool";
             this.tab_ViewerPool.UseVisualStyleBackColor = true;
@@ -214,7 +220,7 @@ namespace StreamHub
             this.tab_GTA.Location = new System.Drawing.Point(4, 24);
             this.tab_GTA.Name = "tab_GTA";
             this.tab_GTA.Padding = new System.Windows.Forms.Padding(3);
-            this.tab_GTA.Size = new System.Drawing.Size(620, 418);
+            this.tab_GTA.Size = new System.Drawing.Size(746, 418);
             this.tab_GTA.TabIndex = 1;
             this.tab_GTA.Text = "Gameviewer Team Assembler";
             this.tab_GTA.UseVisualStyleBackColor = true;
@@ -228,13 +234,51 @@ namespace StreamHub
             this.c_nbr.TabIndex = 13;
             this.c_nbr.Text = "x viewers in queue";
             // 
+            // tab_RoleVoter
+            // 
+            this.tab_RoleVoter.Controls.Add(this.c_VotesRoles);
+            this.tab_RoleVoter.Controls.Add(this.c_StartStopVotes);
+            this.tab_RoleVoter.Location = new System.Drawing.Point(4, 24);
+            this.tab_RoleVoter.Name = "tab_RoleVoter";
+            this.tab_RoleVoter.Padding = new System.Windows.Forms.Padding(3);
+            this.tab_RoleVoter.Size = new System.Drawing.Size(746, 418);
+            this.tab_RoleVoter.TabIndex = 3;
+            this.tab_RoleVoter.Text = "Role Voter";
+            this.tab_RoleVoter.UseVisualStyleBackColor = true;
+            // 
+            // c_VotesRoles
+            // 
+            this.c_VotesRoles.AllowUserToAddRows = false;
+            this.c_VotesRoles.AllowUserToDeleteRows = false;
+            this.c_VotesRoles.AllowUserToOrderColumns = true;
+            this.c_VotesRoles.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.c_VotesRoles.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.c_VotesRoles.Location = new System.Drawing.Point(6, 35);
+            this.c_VotesRoles.Name = "c_VotesRoles";
+            this.c_VotesRoles.ReadOnly = true;
+            this.c_VotesRoles.RowTemplate.Height = 25;
+            this.c_VotesRoles.Size = new System.Drawing.Size(369, 377);
+            this.c_VotesRoles.TabIndex = 9;
+            // 
+            // c_StartStopVotes
+            // 
+            this.c_StartStopVotes.ForeColor = System.Drawing.Color.Red;
+            this.c_StartStopVotes.Location = new System.Drawing.Point(6, 6);
+            this.c_StartStopVotes.Name = "c_StartStopVotes";
+            this.c_StartStopVotes.Size = new System.Drawing.Size(160, 23);
+            this.c_StartStopVotes.TabIndex = 8;
+            this.c_StartStopVotes.Text = "Start /Stop Votes";
+            this.c_StartStopVotes.UseVisualStyleBackColor = true;
+            this.c_StartStopVotes.Click += new System.EventHandler(this.c_StartStopVotes_Click);
+            // 
             // tab_Data
             // 
             this.tab_Data.Controls.Add(this.c_ConnectedUsers);
             this.tab_Data.Location = new System.Drawing.Point(4, 24);
             this.tab_Data.Name = "tab_Data";
             this.tab_Data.Padding = new System.Windows.Forms.Padding(3);
-            this.tab_Data.Size = new System.Drawing.Size(620, 418);
+            this.tab_Data.Size = new System.Drawing.Size(746, 418);
             this.tab_Data.TabIndex = 2;
             this.tab_Data.Text = "Data";
             this.tab_Data.UseVisualStyleBackColor = true;
@@ -255,7 +299,7 @@ namespace StreamHub
             // c_VisualMode
             // 
             this.c_VisualMode.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.c_VisualMode.Location = new System.Drawing.Point(426, 5);
+            this.c_VisualMode.Location = new System.Drawing.Point(552, 5);
             this.c_VisualMode.Name = "c_VisualMode";
             this.c_VisualMode.Size = new System.Drawing.Size(113, 23);
             this.c_VisualMode.TabIndex = 8;
@@ -267,7 +311,7 @@ namespace StreamHub
             // 
             this.c_Overlay.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.c_Overlay.ForeColor = System.Drawing.Color.Green;
-            this.c_Overlay.Location = new System.Drawing.Point(307, 5);
+            this.c_Overlay.Location = new System.Drawing.Point(433, 5);
             this.c_Overlay.Name = "c_Overlay";
             this.c_Overlay.Size = new System.Drawing.Size(113, 23);
             this.c_Overlay.TabIndex = 9;
@@ -279,7 +323,7 @@ namespace StreamHub
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(628, 458);
+            this.ClientSize = new System.Drawing.Size(754, 458);
             this.Controls.Add(this.c_Overlay);
             this.Controls.Add(this.c_VisualMode);
             this.Controls.Add(this.C_ConfigForm);
@@ -294,6 +338,8 @@ namespace StreamHub
             this.tab_ViewerPool.ResumeLayout(false);
             this.tab_GTA.ResumeLayout(false);
             this.tab_GTA.PerformLayout();
+            this.tab_RoleVoter.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.c_VotesRoles)).EndInit();
             this.tab_Data.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.c_ConnectedUsers)).EndInit();
             this.ResumeLayout(false);
@@ -323,5 +369,8 @@ namespace StreamHub
         private System.Windows.Forms.Button c_Overlay;
         private System.Windows.Forms.TabPage tab_Data;
         private System.Windows.Forms.DataGridView c_ConnectedUsers;
+        private System.Windows.Forms.TabPage tab_RoleVoter;
+        private System.Windows.Forms.Button c_StartStopVotes;
+        private System.Windows.Forms.DataGridView c_VotesRoles;
     }
 }

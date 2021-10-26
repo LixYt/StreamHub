@@ -37,14 +37,18 @@ namespace StreamHub
 
         private bool ViewerPool_Status = false;
         private bool GTA_status = false;
+        private bool RoleVote_status = false;
         string channel = "";
+        string BotName = "";
 
         public List<string> ViewerPoolList { get; set; } = new List<string>();
         public List<GTA_User> GTAPoolList { get; set; } = new List<GTA_User>();
+        public List<string> Voters { get; set; } = new List<string>();
         public List<GameUser> ConnectedUsers { get; set; } = new List<GameUser>();
 
         private BindingList<GameUser> UsersList;
         private BindingList<GTA_User> GTAList;
+        private BindingList<RoleVote> VoteList;
         private string SelectedUser = "";
 
         private readonly GraphicsWindow _window;
@@ -58,8 +62,7 @@ namespace StreamHub
 
         private readonly DiscordSocketClient _client;
 
-        
-        
+        List<string> ExcludedNames = new List<string>();
 
         public SHubMain(SHubConfig cfg)
         {
@@ -106,6 +109,9 @@ namespace StreamHub
 
                 client.Connect();
 
+                ExcludedNames.Add(client.TwitchUsername);
+                //ExcludedNames.Add(client.JoinedChannels)
+                
             }
             catch (Exception e)
             {
@@ -120,6 +126,10 @@ namespace StreamHub
             GTAList = new BindingList<GTA_User>(GTAPoolList);
             BindingSource source = new BindingSource(GTAList, null);
             c_GTAPool.DataSource = source;
+
+            VoteList = new BindingList<RoleVote>(config.RoleVotes);
+            BindingSource sourceVoteRole = new BindingSource(VoteList, null);
+            c_VotesRoles.DataSource = sourceVoteRole;
 
             UsersList = new BindingList<GameUser>(ConnectedUsers);
             BindingSource sourceUsers = new BindingSource(UsersList, null);
@@ -166,9 +176,13 @@ namespace StreamHub
 
             _ = DiscordTask();
             #endregion
+
+            #region RolesVoteFeature
+            
+            #endregion
         }
 
-        
+
 
         #region Discord Events
         private Task LogAsync(LogMessage log)
@@ -314,7 +328,7 @@ namespace StreamHub
             Console.WriteLine($"{e.DateTime.ToString()}: {e.BotUsername} - {e.Data}");
         }
         private void Client_OnConnected(object sender, OnConnectedArgs e)
-        {
+        { 
             Console.WriteLine($"Connected to {e.AutoJoinChannel}");
         }
         private void Client_OnJoinedChannel(object sender, OnJoinedChannelArgs e)
@@ -406,6 +420,23 @@ namespace StreamHub
             }
 
             /* ^^^ Gameveiwer Team Assembler ^^^ */
+            /* vvv Role Voter */
+
+            if (config.RoleVotes.Exists(x => x.FormatteCommand(config.CommandSymbol) == e.ChatMessage.Message)
+                && RoleVote_status && !config.RoleVotes.Exists(x => x.UserNames.Contains(e.ChatMessage.Username)))
+            {
+                Invoke(new Action(() => config.RoleVotes.FindLast(x => x.command == e.ChatMessage.Message.Substring(1)).UserNames +=$"{e.ChatMessage.Username},"));
+                Invoke(new Action(() => config.RoleVotes.FindLast(x => x.command == e.ChatMessage.Message.Substring(1)).nbr +=1));
+            }
+            if (config.RoleVotes.Exists(x => x.FormattedCommandDont(config.CommandSymbol) == e.ChatMessage.Message)
+                && RoleVote_status && config.RoleVotes.Exists(x => x.UserNames.Contains(e.ChatMessage.Username)))
+            {
+                string NewUserNames = config.RoleVotes.FindLast(x => x.command == e.ChatMessage.Message.Substring(5)).UserNames;
+                NewUserNames = NewUserNames.Replace($"{e.ChatMessage.Username},", "");
+                Invoke(new Action(() => config.RoleVotes.FindLast(x => x.command == e.ChatMessage.Message.Substring(5)).UserNames = NewUserNames));
+                Invoke(new Action(() => config.RoleVotes.FindLast(x => x.command == e.ChatMessage.Message.Substring(5)).nbr -= 1));
+            }
+
         }
         private void Client_OnWhisperReceived(object sender, OnWhisperReceivedArgs e)
         {
@@ -422,14 +453,21 @@ namespace StreamHub
         }
         private void Client_OnUserJoined(object sender, OnUserJoinedArgs e)
         {
-            Invoke(new Action(() => UsersList.Add(new GameUser() { UserName = e.Username, Connection = DateTime.Now, Disconnection = null })));
-            Debug.WriteLine($"[Twitch] {e.Username} connected to the tchat");
+            try
+            {
+                if (ExcludedNames.Contains(e.Username)) return;
+                Invoke(new Action(() => UsersList.Add(new GameUser() { UserName = e.Username, Connection = DateTime.Now, Disconnection = null })));
+            }
+            catch (Exception ex) { Debug.WriteLine($"Twitch[OnUserJoined]({e.Username}) {ex.Message}"); }
         }
         private void Client_OnUserLeft(object sender, OnUserLeftArgs e)
         {
-            GameUser g = ConnectedUsers.FindLast(x => x.UserName == e.Username);
-            g.Disconnection = DateTime.Now;
-            Debug.WriteLine($"[Twitch] {e.Username} disconnected to the tchat");
+            try 
+            {
+                GameUser g = ConnectedUsers.FindLast(x => x.UserName == e.Username);
+                g.Disconnection = DateTime.Now;
+            }
+            catch (Exception ex) { Debug.WriteLine($"Twitch[OnUserJoined]({e.Username}) {ex.Message}"); }
         }
 
         #endregion
@@ -622,7 +660,7 @@ namespace StreamHub
         }
         private void c_GTA_Auto_Click(object sender, EventArgs e)
         {
-            if (GTA_status) return;
+            if (GTA_status || GTAPoolList.FindAll(x => x.selected).Count > 0) return;
             switch (config.GTA_mode)
             {
                 case "c_GTA_modeFIFO":
@@ -760,9 +798,24 @@ namespace StreamHub
                 foreach (Control cl in cc) { SwitchColor(cl); }
             }
         }
+
+
         #endregion
 
-        
-
+        private void c_StartStopVotes_Click(object sender, EventArgs e)
+        {
+            if (RoleVote_status)
+            {
+                c_StartStopVotes.ForeColor = Color.Red;
+                RoleVote_status = false;
+                client.SendMessage(channel, "Vote Stopped");
+            }
+            else
+            {
+                c_StartStopVotes.ForeColor = Color.Green;
+                RoleVote_status = true;
+                client.SendMessage(channel, "Vote Started");
+            }
+        }
     }
 }

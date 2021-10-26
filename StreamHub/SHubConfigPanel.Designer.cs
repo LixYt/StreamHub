@@ -84,6 +84,11 @@ namespace StreamHub
             this.groupBox7 = new System.Windows.Forms.GroupBox();
             this.label16 = new System.Windows.Forms.Label();
             this.c_Twitch_ClientID = new System.Windows.Forms.TextBox();
+            this.groupBox8 = new System.Windows.Forms.GroupBox();
+            this.NewRoleVote = new System.Windows.Forms.Button();
+            this.c_RolesVoter = new System.Windows.Forms.DataGridView();
+            this.label18 = new System.Windows.Forms.Label();
+            this.DeleteRoleVote = new System.Windows.Forms.Button();
             this.groupBox3.SuspendLayout();
             this.groupBox4.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.c_roles)).BeginInit();
@@ -95,12 +100,14 @@ namespace StreamHub
             ((System.ComponentModel.ISupportInitialize)(this.c_overlay_x)).BeginInit();
             this.groupBox6.SuspendLayout();
             this.groupBox7.SuspendLayout();
+            this.groupBox8.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.c_RolesVoter)).BeginInit();
             this.SuspendLayout();
             // 
             // c_Save
             // 
             this.c_Save.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.c_Save.Location = new System.Drawing.Point(695, 482);
+            this.c_Save.Location = new System.Drawing.Point(953, 477);
             this.c_Save.Name = "c_Save";
             this.c_Save.Size = new System.Drawing.Size(75, 23);
             this.c_Save.TabIndex = 0;
@@ -111,7 +118,7 @@ namespace StreamHub
             // button2
             // 
             this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button2.Location = new System.Drawing.Point(776, 482);
+            this.button2.Location = new System.Drawing.Point(1034, 477);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(111, 23);
             this.button2.TabIndex = 1;
@@ -676,11 +683,70 @@ namespace StreamHub
             this.c_Twitch_ClientID.Size = new System.Drawing.Size(314, 23);
             this.c_Twitch_ClientID.TabIndex = 5;
             // 
+            // groupBox8
+            // 
+            this.groupBox8.Controls.Add(this.DeleteRoleVote);
+            this.groupBox8.Controls.Add(this.NewRoleVote);
+            this.groupBox8.Controls.Add(this.c_RolesVoter);
+            this.groupBox8.Controls.Add(this.label18);
+            this.groupBox8.Location = new System.Drawing.Point(893, 12);
+            this.groupBox8.Name = "groupBox8";
+            this.groupBox8.Size = new System.Drawing.Size(252, 210);
+            this.groupBox8.TabIndex = 23;
+            this.groupBox8.TabStop = false;
+            this.groupBox8.Text = "Live role voter";
+            // 
+            // NewRoleVote
+            // 
+            this.NewRoleVote.Location = new System.Drawing.Point(187, 18);
+            this.NewRoleVote.Name = "NewRoleVote";
+            this.NewRoleVote.Size = new System.Drawing.Size(27, 23);
+            this.NewRoleVote.TabIndex = 10;
+            this.NewRoleVote.Text = "+";
+            this.NewRoleVote.UseVisualStyleBackColor = true;
+            this.NewRoleVote.Click += new System.EventHandler(this.NewRoleVote_Click);
+            // 
+            // c_RolesVoter
+            // 
+            this.c_RolesVoter.AllowUserToOrderColumns = true;
+            this.c_RolesVoter.AllowUserToResizeRows = false;
+            this.c_RolesVoter.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.c_RolesVoter.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.c_RolesVoter.Location = new System.Drawing.Point(7, 42);
+            this.c_RolesVoter.MultiSelect = false;
+            this.c_RolesVoter.Name = "c_RolesVoter";
+            this.c_RolesVoter.RowTemplate.Height = 25;
+            this.c_RolesVoter.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.c_RolesVoter.Size = new System.Drawing.Size(239, 157);
+            this.c_RolesVoter.TabIndex = 9;
+            // 
+            // label18
+            // 
+            this.label18.AutoSize = true;
+            this.label18.Location = new System.Drawing.Point(6, 23);
+            this.label18.Name = "label18";
+            this.label18.Size = new System.Drawing.Size(122, 15);
+            this.label18.TabIndex = 1;
+            this.label18.Text = "Available role for vote";
+            // 
+            // DeleteRoleVote
+            // 
+            this.DeleteRoleVote.Location = new System.Drawing.Point(219, 18);
+            this.DeleteRoleVote.Name = "DeleteRoleVote";
+            this.DeleteRoleVote.Size = new System.Drawing.Size(27, 23);
+            this.DeleteRoleVote.TabIndex = 24;
+            this.DeleteRoleVote.Text = "-";
+            this.DeleteRoleVote.UseVisualStyleBackColor = true;
+            this.DeleteRoleVote.Click += new System.EventHandler(this.DeleteRoleVote_Click);
+            // 
             // SHubConfigPanel
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(899, 517);
+            this.ClientSize = new System.Drawing.Size(1157, 512);
+            this.Controls.Add(this.groupBox8);
             this.Controls.Add(this.groupBox7);
             this.Controls.Add(this.groupBox6);
             this.Controls.Add(this.groupBox5);
@@ -707,6 +773,9 @@ namespace StreamHub
             this.groupBox6.PerformLayout();
             this.groupBox7.ResumeLayout(false);
             this.groupBox7.PerformLayout();
+            this.groupBox8.ResumeLayout(false);
+            this.groupBox8.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.c_RolesVoter)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -736,7 +805,6 @@ namespace StreamHub
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.CheckBox checkBox3;
         private System.Windows.Forms.RadioButton c_GTA_modeFIFO;
-        private System.Windows.Forms.RadioButton radioButton2;
         private System.Windows.Forms.RadioButton c_GTA_modeRR;
         private System.Windows.Forms.RadioButton c_GTA_modeLIFO;
         private System.Windows.Forms.TextBox textBox7;
@@ -775,5 +843,10 @@ namespace StreamHub
         private System.Windows.Forms.GroupBox groupBox7;
         private System.Windows.Forms.Label label16;
         private System.Windows.Forms.TextBox c_Twitch_ClientID;
+        private System.Windows.Forms.GroupBox groupBox8;
+        private System.Windows.Forms.DataGridView c_RolesVoter;
+        private System.Windows.Forms.Label label18;
+        private System.Windows.Forms.Button NewRoleVote;
+        private System.Windows.Forms.Button DeleteRoleVote;
     }
 }

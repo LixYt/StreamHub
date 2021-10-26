@@ -68,7 +68,7 @@ namespace ViewerGameWorker
         {
             foreach(ViewerLive v in ChattingViewers)
             {
-                ViewerLiveToDatabase(v.UserName);
+                ViewerLiveToDatabase(v.UserName, true);
             }
 
             TwitchClient.Disconnect();
@@ -131,6 +131,7 @@ namespace ViewerGameWorker
                 TwitchClient.OnNewSubscriber += Client_OnNewSubscriber;
                 TwitchClient.OnReSubscriber += TwitchClient_OnReSubscriber;
                 TwitchClient.OnConnected += Client_OnConnected;
+                TwitchClient.OnDisconnected += TwitchClient_OnDisconnected;
                 TwitchClient.OnUserJoined += Client_OnUserJoined;
                 TwitchClient.OnUserLeft += Client_OnUserLeft;
                 TwitchClient.OnRaidNotification += TwitchClient_OnRaidNotification;
@@ -165,6 +166,7 @@ namespace ViewerGameWorker
                 clientPubSub.OnStreamUp += ClientPubSub_OnStreamUp;
                 clientPubSub.OnStreamDown += ClientPubSub_OnStreamDown;
                 clientPubSub.OnListenResponse += ClientPubSub_OnListenResponse;
+                clientPubSub.OnPubSubServiceClosed += ClientPubSub_OnPubSubServiceClosed;
 
                 clientPubSub.ListenToBitsEventsV2(channel_id);
                 clientPubSub.ListenToChannelPoints(channel_id);
@@ -182,9 +184,6 @@ namespace ViewerGameWorker
 
 
         }
-
-        
-
 
         #region PubSub Event
         private void ClientPubSub_OnChannelPointsRewardRedeemed(object sender, TwitchLib.PubSub.Events.OnChannelPointsRewardRedeemedArgs e)
@@ -208,17 +207,26 @@ namespace ViewerGameWorker
         {
             isLiveOn = false;
             TwitchClient.SendMessage(channel, $"{config.GameTitle} est maintenant désactivé");
-            // fermer toutes les sessions ChattingViewers en cours quand le live se coupe !!!
+            _logger.LogInformation("Stream Down !");
+            foreach (ViewerLive v in ChattingViewers)
+            {
+                ViewerLiveToDatabase(v.UserName);
+            }
         }
         private void ClientPubSub_OnStreamUp(object sender, TwitchLib.PubSub.Events.OnStreamUpArgs e)
         {
             isLiveOn = true;
             TwitchClient.SendMessage(channel, $"{config.GameTitle} est maintenant actif");
+            _logger.LogInformation("Stream Up !");
         }
         private void ClientPubSub_OnPubSubServiceConnected(object sender, EventArgs e)
         {
             clientPubSub.SendTopics(config.BroadCaster_AccessToken);
             _logger.LogInformation("PubSub connected");
+        }
+        private void ClientPubSub_OnPubSubServiceClosed(object sender, EventArgs e)
+        {
+            _logger.LogInformation("PubSub disconnected");
         }
         #endregion
 
@@ -229,7 +237,11 @@ namespace ViewerGameWorker
         }
         private void Client_OnConnected(object sender, OnConnectedArgs e)
         {
-
+            _logger.LogInformation("Twitch Client connected");
+        }
+        private void TwitchClient_OnDisconnected(object sender, TwitchLib.Communication.Events.OnDisconnectedEventArgs e)
+        {
+            _logger.LogInformation("Twitch Client disconnected");
         }
         private void Client_OnJoinedChannel(object sender, OnJoinedChannelArgs e)
         {
@@ -283,6 +295,14 @@ namespace ViewerGameWorker
         {
             switch (e.Command.CommandText.ToLower())
             {
+                case "commandes":
+                    TwitchClient.SendMessage(channel, $"Score : affiche votre nombre de points. | " +
+                        $"linkdiscord : suivi de votre battletag pour lié votre compte twitch et discord dans ce bot. | " +
+                        $"drawcard : suivi du nombre de point à dépenser (1 à 100) pour tirer une carte. | " +
+                        $"echange : pour échanger une carte avec un autre utilisateur. | " +
+                        $"");
+                    break;
+
                 case "score":
                     TwitchClient.SendMessage(channel, $"{e.Command.ChatMessage.Username} tu as {ctx.Viewers.Where(x => x.UserName == e.Command.ChatMessage.Username).First().Points} points.");
                     break;
@@ -318,14 +338,19 @@ namespace ViewerGameWorker
         #endregion
 
         #region Twitch to Database Methods
-        public void ViewerLiveToDatabase(string UserName)
+        public void ViewerLiveToDatabase(string UserName, bool ignoreLiveStatus = false)
         {
-            if (!isLiveOn) { _logger.LogInformation($"This channel is offline ({UserName}, being connected to IRC)"); return; }
-            ViewerLive v = ChattingViewers.FindLast(x => x.UserName == UserName && x.Disconnected == null);
-            v.Disconnected = DateTime.Now;
-            TimeSpan t = ((TimeSpan)(v.Disconnected - v.Connected));
-            RewardTwitchUser(v.UserName, (int)t.TotalMinutes / 2, "Spending time in here");
-            _logger.LogInformation($"{v.UserName} earn {(int)t.TotalMinutes / 2} while being on the stream");
+            if (!isLiveOn && !ignoreLiveStatus) { _logger.LogInformation($"This channel is offline ({UserName}, being connected to IRC)"); return; }
+            try
+            {
+                ViewerLive v = ChattingViewers.FindLast(x => x.UserName == UserName && x.Disconnected == null);
+                v.Disconnected = DateTime.Now;
+                TimeSpan t = ((TimeSpan)(v.Disconnected - v.Connected));
+                RewardTwitchUser(v.UserName, (int)t.TotalMinutes / 2, "Spending time in here");
+                _logger.LogInformation($"{v.UserName} earn {(int)t.TotalMinutes / 2} while being on the stream");
+            }
+            catch (Exception ex) { _logger.LogError($"ViewerLiveToDatabase : {ex}"); }
+
         }
         public void RegisterTwitchUser(string UserName, string UserId = "")
         {
@@ -375,7 +400,6 @@ namespace ViewerGameWorker
                 List<Card> OrderedCards = Cards.OrderBy(c => c.Rarity).ToList();
 
                 if (OrderedCards.Count() == 0) { _logger.LogInformation("Cards are not set yet !"); return; }
-                //Rarity = 1 => 50%; Rarity = 2 => 25%; Rarity = 3 => 15%; Rarity = 4 => 9%; Rarity = 5 => 1%
 
                 int Choice = new Random().Next(1, 100);
                 if (usedPoints > 0)
@@ -385,6 +409,7 @@ namespace ViewerGameWorker
                     Choice += AddPoints;
                 }
 
+                //Rarity = 1 => 50%; Rarity = 2 => 25%; Rarity = 3 => 15%; Rarity = 4 => 9%; Rarity = 5 => 1%
                 List<Card> CarteTirable;
                 if (Choice <= 50)
                 {

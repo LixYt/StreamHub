@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
@@ -14,6 +15,7 @@ namespace StreamHub
         SHubConfig SHubConfiguration;
 
         private BindingList<Role> GTARoles;
+        private BindingList<RoleVote> RolesVoter;
 
         public SHubConfigPanel(SHubConfig config)
         {            
@@ -42,10 +44,15 @@ namespace StreamHub
                 case "c_GTA_mode_Rfull": c_GTA_mode_Rfull.Checked = true; break;
             }
 
-            GTARoles = new BindingList<Role>(SHubConfiguration.GTA_roles);
             SHubConfiguration.GTA_roles ??= new List<Role>();
+            GTARoles = new BindingList<Role>(SHubConfiguration.GTA_roles);
             BindingSource source = new BindingSource(GTARoles, null);
             c_roles.DataSource = source;
+
+            SHubConfiguration.RoleVotes ??= new List<RoleVote>();
+            RolesVoter = new BindingList<RoleVote>(SHubConfiguration.RoleVotes);
+            BindingSource RoleVotes = new BindingSource(RolesVoter, null);
+            c_RolesVoter.DataSource = RoleVotes;
 
             foreach (var screen in Screen.AllScreens)
             {
@@ -153,6 +160,21 @@ namespace StreamHub
         private void c_overlay_height_ValueChanged(object sender, EventArgs e)
         {
             c_overlay_currentH.Text = c_overlay_height.Value.ToString();
+        }
+
+        private void NewRoleVote_Click(object sender, EventArgs e)
+        {
+            GTA_newRole f = new GTA_newRole();
+            if (f.ShowDialog() == DialogResult.OK)
+            {
+                RolesVoter.Add(new RoleVote() { command = f.command, name = f.name, nbr = f.number, UserNames="" });
+            }
+        }
+
+        private void DeleteRoleVote_Click(object sender, EventArgs e)
+        {
+            RoleVote r = (RoleVote)c_RolesVoter.SelectedRows[0].DataBoundItem;
+            RolesVoter.Remove(r);
         }
     }
 }
